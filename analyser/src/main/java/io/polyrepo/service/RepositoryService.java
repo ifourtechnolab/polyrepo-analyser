@@ -13,13 +13,13 @@ public class RepositoryService {
     private GraphQLClient client;
 
     public String getRepositories(String orgUserName, String token) {
-        int count = getRepositoryCount(token);
+        int count = getRepositoryCount(orgUserName,token);
         String query = "{\"query\":\"query { organization(login: \\\""+orgUserName+"\\\") { repositories(first: " + count + ") { edges { repository:node { name } } } } }\"}";
         return client.getQuery("Bearer "+token, query);
     }
 
-    private int getRepositoryCount(String token) {
-        String query = "{\"query\":\"query { organization(login: \\\"signalapp\\\") { repositories{ totalCount } } }\"}";
+    private int getRepositoryCount(String orgUserName, String token) {
+        String query = "{\"query\":\"query { organization(login: \\\""+orgUserName+"\\\") { repositories{ totalCount } } }\"}";
         JSONObject response = new JSONObject(client.getQuery("Bearer "+token, query));
         return response.getJSONObject("data").getJSONObject("organization").getJSONObject("repositories").getInt("totalCount");
     }
