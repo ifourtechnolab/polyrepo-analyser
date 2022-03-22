@@ -22,8 +22,9 @@ public class TokenController {
 
         if(tokenService.validateToken(token)!=null){
             constants.setToken(token);
+            return "Valid Token";
         }
-        return "Success";
+        return "Invalid Token";
     }
 
 }
