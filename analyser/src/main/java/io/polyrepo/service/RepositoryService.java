@@ -1,7 +1,6 @@
 package io.polyrepo.service;
 
 import io.polyrepo.client.GraphQLClient;
-import io.polyrepo.constant.ApplicationConstants;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,18 +12,15 @@ public class RepositoryService {
     @Autowired
     private GraphQLClient client;
 
-    @Autowired
-    private ApplicationConstants constants;
-
-    public String getRepositories(String orgUserName) {
-        int count = getRepositoryCount();
+    public String getRepositories(String orgUserName, String token) {
+        int count = getRepositoryCount(token);
         String query = "{\"query\":\"query { organization(login: \\\""+orgUserName+"\\\") { repositories(first: " + count + ") { edges { repository:node { name } } } } }\"}";
-        return client.getQuery("Bearer "+constants.getToken(), query);
+        return client.getQuery("Bearer "+token, query);
     }
 
-    private int getRepositoryCount() {
+    private int getRepositoryCount(String token) {
         String query = "{\"query\":\"query { organization(login: \\\"signalapp\\\") { repositories{ totalCount } } }\"}";
-        JSONObject response = new JSONObject(client.getQuery("Bearer "+constants.getToken(), query));
+        JSONObject response = new JSONObject(client.getQuery("Bearer "+token, query));
         return response.getJSONObject("data").getJSONObject("organization").getJSONObject("repositories").getInt("totalCount");
     }
 }
