@@ -20,4 +20,16 @@ public class RepositoryController {
         return result.toMap();
     }
 
+    @GetMapping("/org/{orgUserName}/repo/more")
+    public Map<String,Object> getRepositories(@PathVariable String orgUserName, @RequestHeader("Authorization") String token,@RequestHeader("EndCursor") String endCursor){
+        JSONObject result = new JSONObject(repositoryService.getRepositoriesByCursor(orgUserName,token,endCursor));
+        return result.toMap();
+    }
+
+    @GetMapping("/org/{orgUserName}/repo/{repoName}")
+    public Map<String,Object> getRepositoriesByName(@PathVariable String orgUserName,@PathVariable String repoName ,@RequestHeader("Authorization") String token){
+        JSONObject result = new JSONObject(repositoryService.getRepositoriesByName(orgUserName,token,repoName));
+        return result.toMap();
+    }
+
 }
