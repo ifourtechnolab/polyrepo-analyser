@@ -24,6 +24,9 @@ public class TokenService {
         }catch (FeignException.Unauthorized e){
             e.printStackTrace();
             responseValue="Invalid Token";
+        }catch (FeignException.BadRequest e){
+            e.printStackTrace();
+            responseValue="Bad Request";
         }
         return responseValue;
     }

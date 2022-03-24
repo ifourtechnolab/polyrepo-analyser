@@ -19,7 +19,7 @@ public class TokenController {
     @CrossOrigin
     @GetMapping("/auth")
     public ResponseEntity<?> getToken(@RequestHeader("Authorization") String token){
-        return new ResponseEntity(Collections.singletonMap("response",tokenService.validateToken(token)), HttpStatus.OK);
+        return new ResponseEntity(Collections.singletonMap("message",tokenService.validateToken(token)), HttpStatus.OK);
     }
 
 }
