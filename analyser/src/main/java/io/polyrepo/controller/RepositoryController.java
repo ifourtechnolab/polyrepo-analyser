@@ -15,7 +15,7 @@ public class RepositoryController {
     @Autowired
     private RepositoryService repositoryService;
 
-    @CrossOrigin
+
     @GetMapping("/org/{orgUserName}/repo")
     public ResponseEntity<?> getRepositories(@PathVariable String orgUserName, @RequestHeader("Authorization") String token){
         return repositoryService.getRepositories(orgUserName,token);
