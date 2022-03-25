@@ -16,6 +16,7 @@ public class OrganizationController {
     @Autowired
     private OrganizationService organizationService;
 
+    @CrossOrigin
     @GetMapping("/org/{orgName}")
     public ResponseEntity<?> getOrganization(@PathVariable String orgName, @RequestHeader("Authorization") String token) {
         return organizationService.getOrganization(orgName,token);
