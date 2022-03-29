@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,24 @@ public class RepositoryService {
     @Autowired
     private GraphQLClient client;
 
+    @Value("${getRepositoryCountQuery}")
+    private String getRepositoryCountQuery;
+
+    @Value("${getRepositoriesQueryUnder100}")
+    private String getRepositoriesQueryUnder100;
+
+    @Value("${getRepositoriesQueryOver100}")
+    private String getRepositoriesQueryOver100;
+
+    @Value("${getRepositoriesByCursorQuery}")
+    private String getRepositoriesByCursorQuery;
+
+    @Value("${getRepositoriesByNameQuery}")
+    private String getRepositoriesByNameQuery;
+
+    @Value("${getDefaultBranchOfRepositoryQuery}")
+    private String getDefaultBranchOfRepositoryQuery;
+
     private final Logger LOG = LoggerFactory.getLogger(RepositoryService.class);
 
     /**
@@ -29,7 +48,7 @@ public class RepositoryService {
      * @return            Total count of repositories of specified organization
      */
     private int getRepositoryCount(String orgUserName, String token) {
-        String query = "{\"query\":\"query { organization(login: \\\"" + orgUserName + "\\\") { repositories{ totalCount } } }\"}";
+        String query = String.format(getRepositoryCountQuery,orgUserName);
         ResponseEntity<String> response = client.getQuery("Bearer " + token, query);
         return new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories").getInt("totalCount");
     }
@@ -46,13 +65,13 @@ public class RepositoryService {
         try {
             int count = getRepositoryCount(orgUserName, token);
             if (count <= 100) {
-                String query = "{\"query\":\"query { organization(login: \\\"" + orgUserName + "\\\") { repositories(first: " + count + ") { edges { repository:node { name } } } } }\"}";
+                String query = String.format(getRepositoriesQueryUnder100,orgUserName,count);
                 response = client.getQuery("Bearer " + token, query);
                 JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
                 return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
 
             } else {
-                String query = "{\"query\":\"query { organization(login: \\\"" + orgUserName + "\\\") { repositories(first: 100) { edges { repository:node { name } }pageInfo{endCursor, hasNextPage} } } }\"}";
+                String query = String.format(getRepositoriesQueryOver100,orgUserName);
                 response = client.getQuery("Bearer " + token, query);
                 JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
                 return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
@@ -75,7 +94,7 @@ public class RepositoryService {
      * @return            List of Repository of specified organization with pagination
      */
     public ResponseEntity<?> getRepositoriesByCursor(String orgUserName, String token, String endCursor) {
-        String query = "{\"query\":\"query { organization(login: \\\"" + orgUserName + "\\\") { repositories(first: 100,after:\\\"" + endCursor + "\\\") { edges { repository:node { name } }pageInfo{endCursor, hasNextPage} } } }\"}";
+        String query = String.format(getRepositoriesByCursorQuery,orgUserName,endCursor);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
@@ -98,7 +117,7 @@ public class RepositoryService {
      * @return            List of repository of specified organization having the same name as specified name
      */
     public ResponseEntity<?> getRepositoriesByName(String orgUserName, String token, String repoName) {
-        String query = "{\"query\":\"query {search(query: \\\"is:public org:" + orgUserName + " " + repoName + " in:name\\\", type: REPOSITORY, first: 30) {edges {node {... on Repository {name}}}}}\"}";
+        String query = String.format(getRepositoriesByNameQuery,orgUserName,repoName);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
@@ -121,7 +140,7 @@ public class RepositoryService {
      * @return            Default branch of specified repository
      */
     public ResponseEntity<?> getDefaultBranchOfRepo(String orgUserName, String token, String repoName) {
-        String query = "{\"query\":\"query{repository(owner: \\\""+orgUserName+"\\\", name: \\\""+repoName+"\\\") {defaultBranchRef {defaultBranch :name}}}\"}";
+        String query = String.format(getDefaultBranchOfRepositoryQuery,orgUserName,repoName);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);

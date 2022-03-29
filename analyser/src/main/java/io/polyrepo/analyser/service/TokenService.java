@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ public class TokenService {
     @Autowired
     private GraphQLClient client;
 
+    @Value("${validateTokenQuery}")
+    private String validateTokenQuery;
+
     private final Logger LOG = LoggerFactory.getLogger(TokenService.class);
 
     /**
@@ -29,8 +33,7 @@ public class TokenService {
     public ResponseEntity<?> validateToken(String bearerToken){
         String responseValue = "";
         try {
-            String query ="{\"query\":\"query { viewer{ login } }\"}";
-            ResponseEntity<String> responseEntity = client.getQuery("Bearer " + bearerToken, query);
+            ResponseEntity<String> responseEntity = client.getQuery("Bearer " + bearerToken, validateTokenQuery);
             if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
                 responseValue="Valid Token";
             }
@@ -41,6 +44,6 @@ public class TokenService {
             responseValue="Bad Request";
             LOG.error(e.getMessage());
         }
-        return new ResponseEntity(Collections.singletonMap("message",responseValue), HttpStatus.OK);
+        return new ResponseEntity<>(Collections.singletonMap("message",responseValue), HttpStatus.OK);
     }
 }

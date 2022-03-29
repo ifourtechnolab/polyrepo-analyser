@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,12 @@ public class OrganizationService {
     @Autowired
     private GraphQLClient client;
 
+    @Value("${getOrganizationListQuery}")
+    private String getOrganizationListQuery;
+
+    @Value("${getOrganizationProfileQuery}")
+    private String getOrganizationProfileQuery;
+
     private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
 
     /**
@@ -28,7 +35,7 @@ public class OrganizationService {
      * @return       List of organization
      */
     public ResponseEntity<?> getOrganizationList(String name, String token) {
-        String query = "{\"query\":\"query { search(query : \\\"is:public " + name + " is:name type:org\\\" type : USER first : 15){ edges{ node{ ... on Organization{ name login } } } } }\"}";
+        String query = String.format(getOrganizationListQuery,name);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
@@ -51,7 +58,7 @@ public class OrganizationService {
      * @return        Profile details of specified organization
      */
     public ResponseEntity<?> getOrganizationProfile(String orgName, String token) {
-        String query = "{\"query\":\" query{organization(login: \\\""+orgName+"\\\") {name, url, avatarUrl}} \"}";
+        String query = String.format(getOrganizationProfileQuery,orgName);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
