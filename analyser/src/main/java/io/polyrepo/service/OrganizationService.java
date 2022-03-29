@@ -34,4 +34,19 @@ public class OrganizationService {
 
     }
 
+    public ResponseEntity<?> getOrganizationProfile(String orgName, String token) {
+        String query = "{\"query\":\" query{organization(login: \\\""+orgName+"\\\") {name, url, avatarUrl}} \"}";
+        ResponseEntity<String> response;
+        try {
+            response = client.getQuery("Bearer " + token, query);
+            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
+        }catch (FeignException.Unauthorized e){
+            e.printStackTrace();
+            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
+        }catch (FeignException.BadRequest e){
+            e.printStackTrace();
+            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
+        }
+    }
 }

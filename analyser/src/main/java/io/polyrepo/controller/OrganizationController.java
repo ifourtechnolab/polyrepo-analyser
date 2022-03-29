@@ -21,4 +21,10 @@ public class OrganizationController {
     public ResponseEntity<?> getOrganization(@PathVariable String orgName, @RequestHeader("Authorization") String token) {
         return organizationService.getOrganization(orgName,token);
     }
+
+    @CrossOrigin
+    @GetMapping("org/{orgName}/orgProfile")
+    public ResponseEntity<?> getOrganizationProfile(@PathVariable String orgName, @RequestHeader("Authorization") String token){
+        return organizationService.getOrganizationProfile(orgName,token);
+    }
 }
