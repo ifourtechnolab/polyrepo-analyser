@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class TokenService {
         }catch (FeignException.Unauthorized e){
             responseValue="Invalid Token";
             LOG.error(e.getMessage());
-        }catch (FeignException.BadRequest e){
+        }catch (FeignException.BadRequest | JSONException e){
             responseValue="Bad Request";
             LOG.error(e.getMessage());
         }

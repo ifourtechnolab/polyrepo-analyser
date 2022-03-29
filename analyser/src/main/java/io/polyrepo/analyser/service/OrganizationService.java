@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class OrganizationService {
         }catch (FeignException.Unauthorized e){
             LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
-        }catch (FeignException.BadRequest e){
+        }catch (FeignException.BadRequest | JSONException e){
             LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
         }
@@ -47,7 +48,7 @@ public class OrganizationService {
         }catch (FeignException.Unauthorized e){
             LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
-        }catch (FeignException.BadRequest e){
+        }catch (FeignException.BadRequest | JSONException e){
             LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
         }
