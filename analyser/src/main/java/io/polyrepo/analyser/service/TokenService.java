@@ -21,6 +21,11 @@ public class TokenService {
 
     private final Logger LOG = LoggerFactory.getLogger(TokenService.class);
 
+    /**
+     * Returns the response entity with the GitHub personal access token validation message
+     * @param bearerToken GitHub personal access token
+     * @return            the validation of personal access token
+     */
     public ResponseEntity<?> validateToken(String bearerToken){
         String responseValue = "";
         try {
