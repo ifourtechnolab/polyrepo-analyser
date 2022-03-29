@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
 
 @Service
 public class TokenService {
@@ -18,7 +20,7 @@ public class TokenService {
 
     private final Logger LOG = LoggerFactory.getLogger(TokenService.class);
 
-    public String validateToken(String bearerToken){
+    public ResponseEntity<?> validateToken(String bearerToken){
         String responseValue = "";
         try {
             String query ="{\"query\":\"query { viewer{ login } }\"}";
@@ -33,6 +35,6 @@ public class TokenService {
             responseValue="Bad Request";
             LOG.error(e.getMessage());
         }
-        return responseValue;
+        return new ResponseEntity(Collections.singletonMap("message",responseValue), HttpStatus.OK);
     }
 }
