@@ -1,6 +1,6 @@
-package io.polyrepo.controller;
+package io.polyrepo.analyser.controller;
 
-import io.polyrepo.service.TokenService;
+import io.polyrepo.analyser.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 
 @RestController
-@RequestMapping("/polyrepo/analyser")
 public class TokenController {
 
     @Autowired

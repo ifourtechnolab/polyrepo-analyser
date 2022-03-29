@@ -1,4 +1,4 @@
-package io.polyrepo.client;
+package io.polyrepo.analyser.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

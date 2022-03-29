@@ -1,8 +1,10 @@
-package io.polyrepo.service;
+package io.polyrepo.analyser.service;
 
 import feign.FeignException;
-import io.polyrepo.client.GraphQLClient;
+import io.polyrepo.analyser.client.GraphQLClient;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ public class OrganizationService {
     @Autowired
     private GraphQLClient client;
 
+    private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
 
     public ResponseEntity<?> getOrganization(String name, String token) {
         String query = "{\"query\":\"query { search(query : \\\"is:public " + name + " is:name type:org\\\" type : USER first : 15){ edges{ node{ ... on Organization{ name login } } } } }\"}";
@@ -25,10 +28,10 @@ public class OrganizationService {
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
         }catch (FeignException.Unauthorized e){
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
         }catch (FeignException.BadRequest e){
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
         }
 
@@ -42,10 +45,10 @@ public class OrganizationService {
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
         }catch (FeignException.Unauthorized e){
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
         }catch (FeignException.BadRequest e){
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
         }
     }

@@ -1,17 +1,22 @@
-package io.polyrepo.service;
+package io.polyrepo.analyser.service;
 
 import feign.FeignException;
-import io.polyrepo.client.GraphQLClient;
+import io.polyrepo.analyser.client.GraphQLClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 
 @Service
 public class TokenService {
 
     @Autowired
     private GraphQLClient client;
+
+    private final Logger LOG = LoggerFactory.getLogger(TokenService.class);
 
     public String validateToken(String bearerToken){
         String responseValue = "";
@@ -22,11 +27,11 @@ public class TokenService {
                 responseValue="Valid Token";
             }
         }catch (FeignException.Unauthorized e){
-            e.printStackTrace();
             responseValue="Invalid Token";
+            LOG.error(e.getMessage());
         }catch (FeignException.BadRequest e){
-            e.printStackTrace();
             responseValue="Bad Request";
+            LOG.error(e.getMessage());
         }
         return responseValue;
     }

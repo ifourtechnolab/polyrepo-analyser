@@ -1,4 +1,4 @@
-package io.polyrepo;
+package io.polyrepo.analyser;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @EnableFeignClients
 public class PolyRepoAnalyserApplication {
-
 
 	public static void main(String[] args) {
 		SpringApplication.run(PolyRepoAnalyserApplication.class, args);

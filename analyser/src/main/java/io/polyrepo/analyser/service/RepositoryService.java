@@ -1,8 +1,10 @@
-package io.polyrepo.service;
+package io.polyrepo.analyser.service;
 
 import feign.FeignException;
-import io.polyrepo.client.GraphQLClient;
+import io.polyrepo.analyser.client.GraphQLClient;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ public class RepositoryService {
 
     @Autowired
     private GraphQLClient client;
+
+    private final Logger LOG = LoggerFactory.getLogger(RepositoryService.class);
 
     private int getRepositoryCount(String orgUserName, String token) {
         String query = "{\"query\":\"query { organization(login: \\\"" + orgUserName + "\\\") { repositories{ totalCount } } }\"}";
@@ -40,10 +44,10 @@ public class RepositoryService {
                 return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
             }
         } catch (FeignException.Unauthorized e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
@@ -56,10 +60,10 @@ public class RepositoryService {
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
         }catch (FeignException.Unauthorized e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
@@ -72,10 +76,26 @@ public class RepositoryService {
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
         }catch (FeignException.Unauthorized e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    public ResponseEntity<?> getDefaultBranchOfRepo(String orgUserName, String token, String repoName) {
+        String query = "{\"query\":\"query{repository(owner: \\\""+orgUserName+"\\\", name: \\\""+repoName+"\\\") {defaultBranchRef {defaultBranch :name}}}\"}";
+        ResponseEntity<String> response;
+        try {
+            response = client.getQuery("Bearer " + token, query);
+            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("repository");
+            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
+        }catch (FeignException.Unauthorized e) {
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+        } catch (FeignException.BadRequest e) {
+            LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }

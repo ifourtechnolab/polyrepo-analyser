@@ -1,4 +1,4 @@
-package io.polyrepo.config;
+package io.polyrepo.analyser.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
