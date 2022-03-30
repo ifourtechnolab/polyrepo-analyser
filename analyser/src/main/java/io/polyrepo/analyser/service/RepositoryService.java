@@ -36,9 +36,6 @@ public class RepositoryService {
     @Value("${getRepositoriesByNameQuery}")
     private String getRepositoriesByNameQuery;
 
-    @Value("${getDefaultBranchOfRepositoryQuery}")
-    private String getDefaultBranchOfRepositoryQuery;
-
     private final Logger LOG = LoggerFactory.getLogger(RepositoryService.class);
 
     /**
