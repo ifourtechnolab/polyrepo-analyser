@@ -132,26 +132,4 @@ public class RepositoryService {
         }
     }
 
-    /**
-     * This method with returns the default branch of the specified repository of the organization
-     * @param orgUserName GitHub Organization login name
-     * @param token       GitHub personal access token
-     * @param repoName    Repository name
-     * @return            Default branch of specified repository
-     */
-    public ResponseEntity<?> getDefaultBranchOfRepo(String orgUserName, String token, String repoName) {
-        String query = String.format(getDefaultBranchOfRepositoryQuery,orgUserName,repoName);
-        ResponseEntity<String> response;
-        try {
-            response = client.getQuery("Bearer " + token, query);
-            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("repository");
-            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
-        }catch (FeignException.Unauthorized e) {
-            LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
-        } catch (FeignException.BadRequest | JSONException e) {
-            LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
-        }
-    }
 }

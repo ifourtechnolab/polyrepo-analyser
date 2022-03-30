@@ -30,10 +30,4 @@ public class RepositoryController {
         return repositoryService.getRepositoriesByName(orgUserName,token,repoName);
     }
 
-    @CrossOrigin
-    @GetMapping("/{orgUserName}/repo/{repoName}/defaultbranch")
-    public ResponseEntity<?> getDefaultBranch(@PathVariable String orgUserName,@PathVariable String repoName ,@RequestHeader("Authorization") String token){
-        return repositoryService.getDefaultBranchOfRepo(orgUserName,token,repoName);
-    }
-
 }
