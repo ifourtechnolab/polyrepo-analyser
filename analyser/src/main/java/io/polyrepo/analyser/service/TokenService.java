@@ -33,8 +33,10 @@ public class TokenService {
     public ResponseEntity<?> validateToken(String bearerToken){
         String responseValue = "";
         try {
+            LOG.info("Validating Bearer Token");
             ResponseEntity<String> responseEntity = client.getQuery("Bearer " + bearerToken, validateTokenQuery);
             if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
+                LOG.info("Bearer Token Valid");
                 responseValue="Valid Token";
             }
         }catch (FeignException.Unauthorized e){
