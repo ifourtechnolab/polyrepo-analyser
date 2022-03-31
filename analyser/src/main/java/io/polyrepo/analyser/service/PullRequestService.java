@@ -29,17 +29,24 @@ public class PullRequestService {
 
     private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
 
+    /**
+     * This method will return the list of pull requests without activity since x days from the selected
+     * repositories by user
+     * @param token         GitHub personal access token
+     * @param orgUserName   GitHub Organization login name
+     * @param repoList      List of Repositories selected by user
+     * @param days          Number of days without activity in pull request
+     * @return              List of pull requests without activity since x days
+     */
     public ResponseEntity<?> getPRNotUpdatedByDays(String token, String orgUserName, Map<String, List<String>> repoList, int days) {
         StringBuilder queryRepo = new StringBuilder();
         for (String repositoryName : repoList.get("repositories")) {
-            System.out.println(repositoryName);
             queryRepo.append("repo:").append(orgUserName).append("/").append(repositoryName).append(" ");
         }
-        System.out.println(queryRepo);
         LocalDate date = LocalDate.now().minusDays(days);
         DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String queryDate = date.format(formatters);
-        System.out.println("Date "+queryDate);
+        LOG.info("Getting list of pull requests without activity since "+queryDate+" from organization: "+orgUserName);
 
         String query = String.format(getPullRequestNotUpdatedByDaysQuery,queryRepo,queryDate);
         ResponseEntity<String> response;
