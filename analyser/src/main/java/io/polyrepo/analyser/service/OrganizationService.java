@@ -38,6 +38,7 @@ public class OrganizationService {
         String query = String.format(getOrganizationListQuery,name);
         ResponseEntity<String> response;
         try {
+            LOG.info("Getting list of organizations with \""+name+"\" in name");
             response = client.getQuery("Bearer " + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
@@ -53,14 +54,15 @@ public class OrganizationService {
 
     /**
      * This method will fetch the name, url and avatar image url of the specified organization
-     * @param orgName GitHub Organization login name
+     * @param orgUserName GitHub Organization login name
      * @param token   GitHub personal access token
      * @return        Profile details of specified organization
      */
-    public ResponseEntity<?> getOrganizationProfile(String orgName, String token) {
-        String query = String.format(getOrganizationProfileQuery,orgName);
+    public ResponseEntity<?> getOrganizationProfile(String orgUserName, String token) {
+        String query = String.format(getOrganizationProfileQuery,orgUserName);
         ResponseEntity<String> response;
         try {
+            LOG.info("Getting Organization profile of : "+orgUserName);
             response = client.getQuery("Bearer " + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);

@@ -61,13 +61,16 @@ public class RepositoryService {
         ResponseEntity<String> response;
         try {
             int count = getRepositoryCount(orgUserName, token);
+            LOG.info("Total count of repositories: "+count);
             if (count <= 100) {
+                LOG.info("Getting all the repositories");
                 String query = String.format(getRepositoriesQueryUnder100,orgUserName,count);
                 response = client.getQuery("Bearer " + token, query);
                 JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
                 return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
 
             } else {
+                LOG.info("Getting first 100 repositories");
                 String query = String.format(getRepositoriesQueryOver100,orgUserName);
                 response = client.getQuery("Bearer " + token, query);
                 JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
@@ -94,6 +97,7 @@ public class RepositoryService {
         String query = String.format(getRepositoriesByCursorQuery,orgUserName,endCursor);
         ResponseEntity<String> response;
         try {
+            LOG.info("Getting 100 repositories after the cursor \""+endCursor+"\"");
             response = client.getQuery("Bearer " + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
@@ -117,6 +121,7 @@ public class RepositoryService {
         String query = String.format(getRepositoriesByNameQuery,orgUserName,repoName);
         ResponseEntity<String> response;
         try {
+            LOG.info("Getting repositories by name : "+repoName);
             response = client.getQuery("Bearer " + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
             return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
