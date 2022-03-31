@@ -1,12 +1,10 @@
 package io.polyrepo.analyser.controller;
 
+import io.polyrepo.analyser.model.RepoNamesList;
 import io.polyrepo.analyser.service.IssueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -18,8 +16,8 @@ public class IssueController {
 
     @CrossOrigin
     @PostMapping("/{orgUserName}/repo/issuesWithPriority1")
-    public ResponseEntity<?> getIssueWithPriority1(@PathVariable String orgUserName, @RequestHeader("Authorization") String token, @RequestBody List<Map<String,String>> repoList) {
-        return issueService.getIssueWithPriority1(orgUserName, token, repoList);
+    public ResponseEntity<?> getIssueWithPriority1(@PathVariable String orgUserName, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
+        return issueService.getIssueWithPriority1(orgUserName, token, repoNamesList);
     }
 
 }
