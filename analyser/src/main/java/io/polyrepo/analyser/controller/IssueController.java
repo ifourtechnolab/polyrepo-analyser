@@ -20,11 +20,13 @@ public class IssueController {
         return issueService.getIssueWithPriority1(orgUserName, token, repoNamesList);
     }
 
+    @CrossOrigin
     @GetMapping("/{orgUserName}/closedP1IssuesTime")
     public ResponseEntity<?> getClosedP1IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token){
         return issueService.getClosedP1IssuesTime(orgUserName,token);
     }
 
+    @CrossOrigin
     @GetMapping("/{orgUserName}/closedP2IssuesTime")
     public ResponseEntity<?> getClosedP2IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token){
         return issueService.getClosedP2IssuesTime(orgUserName,token);
