@@ -2,6 +2,8 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.model.RepoName;
+import io.polyrepo.analyser.model.RepoNamesList;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -34,21 +36,25 @@ public class PullRequestService {
      * repositories by user
      * @param token         GitHub personal access token
      * @param orgUserName   GitHub Organization login name
-     * @param repoList      List of Repositories selected by user
+     * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days without activity in pull request
      * @return              List of pull requests without activity since x days
      */
-    public ResponseEntity<?> getPRNotUpdatedByDays(String token, String orgUserName, Map<String, List<String>> repoList, int days) {
-        StringBuilder queryRepo = new StringBuilder();
-        for (String repositoryName : repoList.get("repositories")) {
-            queryRepo.append("repo:").append(orgUserName).append("/").append(repositoryName).append(" ");
+    public ResponseEntity<?> getPRNotUpdatedByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) {
+        StringBuilder repoNamesString = new StringBuilder();
+        for (RepoName r:
+                repoNamesList.getRepoNames()) {
+            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
         }
+        if(repoNamesList.getRepoNames().isEmpty()){ repoNamesString.append("org:").append(orgUserName);}
+
         LocalDate date = LocalDate.now().minusDays(days);
         DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String queryDate = date.format(formatters);
-        LOG.info("Getting list of pull requests without activity since "+queryDate+" from organization: "+orgUserName);
+        String queryDateString = date.format(formatters);
+        LOG.info("Getting list of pull requests without activity since "+queryDateString+" from organization: "+orgUserName);
+        LOG.info("List of selected repositories : "+repoNamesList);
 
-        String query = String.format(getPullRequestNotUpdatedByDaysQuery,queryRepo,queryDate);
+        String query = String.format(getPullRequestNotUpdatedByDaysQuery,repoNamesString,queryDateString);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
