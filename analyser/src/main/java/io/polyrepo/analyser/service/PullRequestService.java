@@ -68,4 +68,33 @@ public class PullRequestService {
             return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
         }
     }
+
+    public ResponseEntity<?> getUnMergedPullRequestByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) {
+        StringBuilder repoNamesString = new StringBuilder();
+        for (RepoName r:
+                repoNamesList.getRepoNames()) {
+            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
+        }
+        if(repoNamesList.getRepoNames().isEmpty()){ repoNamesString.append("org:").append(orgUserName);}
+
+        LocalDate date = LocalDate.now().minusDays(days);
+        DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String queryDateString = date.format(formatters);
+        LOG.info("Getting list of pull requests not merged since "+queryDateString+" from organization: "+orgUserName);
+        LOG.info("List of selected repositories : "+repoNamesList);
+
+        String query = String.format(getPullRequestNotUpdatedByDaysQuery,repoNamesString,queryDateString);
+        ResponseEntity<String> response;
+        try {
+            response = client.getQuery("Bearer " + token, query);
+            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
+        }catch (FeignException.Unauthorized e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
+        }catch (FeignException.BadRequest | JSONException e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
+        }
+    }
 }
