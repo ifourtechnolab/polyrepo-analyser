@@ -29,6 +29,9 @@ public class PullRequestService {
     @Value("${getPullRequestNotUpdatedByDaysQuery}")
     private String getPullRequestNotUpdatedByDaysQuery;
 
+    @Value("${getUnMergedPullRequestByDayQuery}")
+    private String getUnMergedPullRequestByDayQuery;
+
     private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
 
     /**
@@ -83,7 +86,7 @@ public class PullRequestService {
         LOG.info("Getting list of pull requests not merged since "+queryDateString+" from organization: "+orgUserName);
         LOG.info("List of selected repositories : "+repoNamesList);
 
-        String query = String.format(getPullRequestNotUpdatedByDaysQuery,repoNamesString,queryDateString);
+        String query = String.format(getUnMergedPullRequestByDayQuery,repoNamesString,queryDateString);
         ResponseEntity<String> response;
         try {
             response = client.getQuery("Bearer " + token, query);
