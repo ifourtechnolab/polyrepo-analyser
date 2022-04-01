@@ -72,6 +72,14 @@ public class PullRequestService {
         }
     }
 
+    /**
+     * This method will return list of pull requests which are not merged since x days
+     * @param token         GitHub personal access token
+     * @param orgUserName   GitHub Organization login name
+     * @param repoNamesList List of Repositories selected by user
+     * @param days          Number of days without merged in pull requests
+     * @return              List of pull requests which are not merged since x days
+     */
     public ResponseEntity<?> getUnMergedPullRequestByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) {
         StringBuilder repoNamesString = new StringBuilder();
         for (RepoName r:
