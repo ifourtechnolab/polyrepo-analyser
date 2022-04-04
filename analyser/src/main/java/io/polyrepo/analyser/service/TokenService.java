@@ -11,9 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-
-
 @Service
 public class TokenService {
 
@@ -30,22 +27,15 @@ public class TokenService {
      * @param bearerToken GitHub personal access token
      * @return            the validation of personal access token
      */
-    public ResponseEntity<?> validateToken(String bearerToken){
+    public String validateToken(String bearerToken) throws FeignException, JSONException{
         String responseValue = "";
-        try {
+
             LOG.info("Validating Bearer Token");
             ResponseEntity<String> responseEntity = client.getQuery("Bearer " + bearerToken, validateTokenQuery);
             if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
                 LOG.info("Bearer Token Valid");
                 responseValue="Valid Token";
             }
-        }catch (FeignException.Unauthorized e){
-            responseValue="Invalid Token";
-            LOG.error(e.getMessage());
-        }catch (FeignException.BadRequest | JSONException e){
-            responseValue="Bad Request";
-            LOG.error(e.getMessage());
-        }
-        return new ResponseEntity<>(Collections.singletonMap("message",responseValue), HttpStatus.OK);
+        return responseValue;
     }
 }
