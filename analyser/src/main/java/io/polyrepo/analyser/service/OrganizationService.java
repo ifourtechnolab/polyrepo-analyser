@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Map;
 
 @Service
 public class OrganizationService {
@@ -34,21 +35,14 @@ public class OrganizationService {
      * @param token  GitHub personal access token
      * @return       List of organization
      */
-    public ResponseEntity<?> getOrganizationList(String name, String token) {
+    public Map<String,Object> getOrganizationList(String name, String token) throws FeignException, JSONException{
         String query = String.format(getOrganizationListQuery,name);
         ResponseEntity<String> response;
-        try {
             LOG.info("Getting list of organizations with \""+name+"\" in name");
             response = client.getQuery("Bearer " + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
-            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
-        }catch (FeignException.Unauthorized e){
-            LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
-        }catch (FeignException.BadRequest | JSONException e){
-            LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
-        }
+            return result.toMap();
+
 
     }
 
