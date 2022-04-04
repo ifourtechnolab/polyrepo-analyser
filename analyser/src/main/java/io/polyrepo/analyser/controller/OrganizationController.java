@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collections;
 
 @RestController
@@ -38,6 +37,14 @@ public class OrganizationController {
     @CrossOrigin
     @GetMapping("/{orgName}/orgProfile")
     public ResponseEntity<?> getOrganizationProfile(@PathVariable String orgName, @RequestHeader("Authorization") String token){
-        return organizationService.getOrganizationProfile(orgName,token);
+        try{
+            return new ResponseEntity<>(organizationService.getOrganizationProfile(orgName,token),HttpStatus.OK);
+        }catch (FeignException.Unauthorized e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
+        }catch (FeignException.BadRequest | JSONException e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
+        }
     }
 }

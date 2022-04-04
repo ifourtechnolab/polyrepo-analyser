@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collections;
-
 
 @RestController
 public class TokenController {
@@ -24,7 +22,7 @@ public class TokenController {
     @CrossOrigin
     @GetMapping("/auth")
     public ResponseEntity<?> getToken(@RequestHeader("Authorization") String token){
-        String responseValue="";
+        String responseValue;
         try{
             responseValue = tokenService.validateToken(token);
         }catch (FeignException.Unauthorized e){

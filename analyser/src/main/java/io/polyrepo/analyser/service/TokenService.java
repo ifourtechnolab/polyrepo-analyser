@@ -11,9 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-
-
 @Service
 public class TokenService {
 
@@ -39,7 +36,6 @@ public class TokenService {
                 LOG.info("Bearer Token Valid");
                 responseValue="Valid Token";
             }
-
         return responseValue;
     }
 }
