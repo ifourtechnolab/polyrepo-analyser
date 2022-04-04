@@ -27,10 +27,10 @@ public class OrganizationController {
             return new ResponseEntity<>(organizationService.getOrganizationList(orgName,token),HttpStatus.OK);
         }catch (FeignException.Unauthorized e){
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message","Unauthorized"), HttpStatus.UNAUTHORIZED);
         }catch (FeignException.BadRequest | JSONException e){
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message","Bad Request"),HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -41,10 +41,10 @@ public class OrganizationController {
             return new ResponseEntity<>(organizationService.getOrganizationProfile(orgName,token),HttpStatus.OK);
         }catch (FeignException.Unauthorized e){
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Unauthorized"),HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message","Unauthorized"),HttpStatus.UNAUTHORIZED);
         }catch (FeignException.BadRequest | JSONException e){
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges","Bad Request"),HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message","Bad Request"),HttpStatus.BAD_REQUEST);
         }
     }
 }

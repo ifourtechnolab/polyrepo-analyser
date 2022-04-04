@@ -28,10 +28,10 @@ public class RepositoryController {
             return new ResponseEntity<>(repositoryService.getRepositories(orgUserName, token), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest | JSONException e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -42,10 +42,10 @@ public class RepositoryController {
             return new ResponseEntity<>(repositoryService.getRepositoriesByCursor(orgUserName, token, endCursor), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest | JSONException e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -56,10 +56,10 @@ public class RepositoryController {
             return new ResponseEntity<>(repositoryService.getRepositoriesByName(orgUserName, token, repoName), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest | JSONException e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
 

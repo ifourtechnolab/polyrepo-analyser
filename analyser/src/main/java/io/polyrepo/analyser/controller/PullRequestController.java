@@ -29,10 +29,10 @@ public class PullRequestController {
             return new ResponseEntity<>(pullRequestService.getPRNotUpdatedByDays(token, orgUserName, repoNamesList, days), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest | JSONException e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -43,10 +43,10 @@ public class PullRequestController {
             return new ResponseEntity<>(pullRequestService.getUnMergedPullRequestByDays(token, orgUserName, repoNamesList, days), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Unauthorized"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
         } catch (FeignException.BadRequest | JSONException e) {
             LOG.error(e.getMessage());
-            return new ResponseEntity<>(Collections.singletonMap("edges", "Bad Request"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Bad Request"), HttpStatus.BAD_REQUEST);
         }
     }
 
