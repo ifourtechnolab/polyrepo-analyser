@@ -64,5 +64,53 @@ public class IssueService {
             return new ResponseEntity<>(Collections.singletonMap("message","Bad Request"),HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**This method returns the list of priority-1 issue creation and closing time through
+     * which average time taken to resolve priority-1 issues can be obtained
+     * @param orgUserName GitHub Organization login name
+     * @param token       GitHub personal access token
+     * @return            List of priority-1 issues' creation and closing time
+     */
+    public ResponseEntity<?> getClosedP1IssuesTime(String orgUserName, String token) {
+        String query = String.format(getClosedP1IssuesTimeQuery,orgUserName);
+        LOG.info("Getting creation and closing time of priority-1 issues of organization : "+orgUserName);
+
+        ResponseEntity<String> response;
+        try {
+            response = client.getQuery("Bearer " + token, query);
+            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
+        }catch (FeignException.Unauthorized e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("message","Unauthorized"),HttpStatus.UNAUTHORIZED);
+        }catch (FeignException.BadRequest e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("message","Bad Request"),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    /**This method returns the list of priority-2 issue creation and closing time through
+     * which average time taken to resolve priority-2 issues can be obtained
+     * @param orgUserName GitHub Organization login name
+     * @param token       GitHub personal access token
+     * @return            List of priority-2 issues' creation and closing time
+     */
+    public ResponseEntity<?> getClosedP2IssuesTime(String orgUserName, String token) {
+        String query = String.format(getClosedP2IssuesTimeQuery,orgUserName);
+        LOG.info("Getting creation and closing time of priority-2 issues of organization : "+orgUserName);
+
+        ResponseEntity<String> response;
+        try {
+            response = client.getQuery("Bearer " + token, query);
+            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+            return new ResponseEntity<>(result.toMap(), HttpStatus.OK);
+        }catch (FeignException.Unauthorized e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("message","Unauthorized"),HttpStatus.UNAUTHORIZED);
+        }catch (FeignException.BadRequest e){
+            LOG.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap("message","Bad Request"),HttpStatus.BAD_REQUEST);
+        }
+    }
 }
 
