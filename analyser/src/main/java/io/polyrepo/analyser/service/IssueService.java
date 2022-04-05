@@ -13,13 +13,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
 public class IssueService {
 
-    @Value("${getIssueWithPriority1Query}")
-    private String getIssueWithPriority1Query;
+    @Value("${getPriority1IssuesOpenedBeforeXDaysQuery}")
+    private String getPriority1IssuesOpenedBeforeXDaysQuery;
 
     @Value("${getClosedP1IssuesTimeQuery}")
     private String getClosedP1IssuesTimeQuery;
@@ -39,9 +41,10 @@ public class IssueService {
      * @param orgUserName   GitHub Organization login name
      * @param token         GitHub personal access token
      * @param repoNamesList List of Repositories selected by user
-     * @return List of priority-1 issues open since x date from selected repositories
+     * @param days          Number of days since before priority-1 issues are open
+     * @return List of priority-1 issues open since before x date from selected repositories
      */
-    public Map<String, Object> getIssueWithPriority1(String orgUserName, String token, RepoNamesList repoNamesList) throws FeignException, JSONException {
+    public Map<String, Object> getPriority1IssuesOpenedBeforeXDays(String orgUserName, String token, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();
         for (RepoName r :
                 repoNamesList.getRepoNames()) {
@@ -51,8 +54,11 @@ public class IssueService {
             repoNamesString.append("org:").append(orgUserName);
         }
 
-        String query = String.format(getIssueWithPriority1Query, repoNamesString);
-        LOG.info("Getting priority-1 issues from selected repositories of organization : " + orgUserName);
+        LocalDate date = LocalDate.now().minusDays(days);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String queryDateString = date.format(formatter);
+        String query = String.format(getPriority1IssuesOpenedBeforeXDaysQuery, repoNamesString, queryDateString);
+        LOG.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
         LOG.info("List of selected repositories : " + repoNamesList);
 
         ResponseEntity<String> response;

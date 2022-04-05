@@ -24,10 +24,10 @@ public class IssueController {
     private final Logger LOG = LoggerFactory.getLogger(IssueController.class);
 
     @CrossOrigin
-    @PostMapping("/{orgUserName}/repo/issuesWithPriority1")
-    public ResponseEntity<?> getIssueWithPriority1(@PathVariable String orgUserName, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
+    @PostMapping("/{orgUserName}/repo/issuesWithPriority1/openSinceBefore/{days}")
+    public ResponseEntity<?> getPriority1IssuesOpenedBeforeXDays(@PathVariable String orgUserName, @PathVariable int days, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
         try {
-            return new ResponseEntity<>(issueService.getIssueWithPriority1(orgUserName, token, repoNamesList), HttpStatus.OK);
+            return new ResponseEntity<>(issueService.getPriority1IssuesOpenedBeforeXDays(orgUserName, token, repoNamesList, days), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             LOG.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap("message", "Unauthorized"), HttpStatus.UNAUTHORIZED);
