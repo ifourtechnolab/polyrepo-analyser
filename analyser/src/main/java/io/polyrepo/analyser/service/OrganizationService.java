@@ -32,6 +32,8 @@ public class OrganizationService {
      * @param name  GitHub Organization login name
      * @param token GitHub personal access token
      * @return List of organization
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getOrganizationList(String name, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationListQuery, name);
@@ -48,6 +50,8 @@ public class OrganizationService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return Profile details of specified organization
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getOrganizationProfile(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationProfileQuery, orgUserName);

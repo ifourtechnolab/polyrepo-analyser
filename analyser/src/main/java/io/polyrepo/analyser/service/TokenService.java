@@ -26,6 +26,8 @@ public class TokenService {
      * Returns the response entity with the GitHub personal access token validation message
      * @param bearerToken GitHub personal access token
      * @return            the validation of personal access token
+     * @throws FeignException
+     * @throws JSONException
      */
     public String validateToken(String bearerToken) throws FeignException, JSONException{
         String responseValue = "";

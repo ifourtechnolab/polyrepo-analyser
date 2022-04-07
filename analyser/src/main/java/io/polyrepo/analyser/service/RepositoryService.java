@@ -58,6 +58,8 @@ public class RepositoryService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of repositories of specified organization
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getRepositories(String orgUserName, String token) throws FeignException, JSONException {
         ResponseEntity<String> response;
@@ -87,6 +89,8 @@ public class RepositoryService {
      * @param token       GitHub personal access token
      * @param endCursor   End cursor of repository list json
      * @return List of Repository of specified organization with pagination
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getRepositoriesByCursor(String orgUserName, String token, String endCursor) throws FeignException, JSONException {
         String query = String.format(getRepositoriesByCursorQuery, orgUserName, endCursor);
@@ -105,6 +109,8 @@ public class RepositoryService {
      * @param token       GitHub personal access token
      * @param repoName    Repository name
      * @return List of repository of specified organization having the same name as specified name
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getRepositoriesByName(String orgUserName, String token, String repoName) throws FeignException, JSONException {
         String query = String.format(getRepositoriesByNameQuery, orgUserName, repoName);
