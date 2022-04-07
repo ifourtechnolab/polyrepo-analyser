@@ -41,6 +41,8 @@ public class PullRequestService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days without activity in pull request
      * @return List of pull requests without activity since x days
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getPRNotUpdatedByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();
@@ -74,6 +76,8 @@ public class PullRequestService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days without merged in pull requests
      * @return List of pull requests which are not merged since x days
+     * @throws FeignException
+     * @throws JSONException
      */
     public Map<String, Object> getUnMergedPullRequestByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();

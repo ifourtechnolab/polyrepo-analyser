@@ -1,4 +1,4 @@
-package io.polyrepo;
+package io.polyrepo.analyser;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
