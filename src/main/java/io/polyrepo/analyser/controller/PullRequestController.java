@@ -24,7 +24,6 @@ public class PullRequestController {
 
     private final Logger logger = LoggerFactory.getLogger(PullRequestController.class);
 
-    @CrossOrigin
     @PostMapping("/{orgUserName}/repo/prLastUpdate/{days}")
     public ResponseEntity<Map<String,Object>> getPullRequestNotUpdatedByDays(@PathVariable String orgUserName, @PathVariable int days, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
         try {
@@ -38,7 +37,6 @@ public class PullRequestController {
         }
     }
 
-    @CrossOrigin
     @PostMapping("/{orgUserName}/repo/prUnMerged/{days}")
     public ResponseEntity<Map<String,Object>> getPullRequestUnMergedByDays(@PathVariable String orgUserName, @PathVariable int days, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
         try {

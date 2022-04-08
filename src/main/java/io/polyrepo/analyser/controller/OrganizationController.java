@@ -22,7 +22,6 @@ public class OrganizationController {
 
     private final Logger logger = LoggerFactory.getLogger(OrganizationController.class);
 
-    @CrossOrigin
     @GetMapping("/{orgName}")
     public ResponseEntity<Map<String,Object>> getOrganizationsList(@PathVariable String orgName, @RequestHeader("Authorization") String token) {
         try{
@@ -36,7 +35,6 @@ public class OrganizationController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/{orgName}/orgProfile")
     public ResponseEntity<Map<String,Object>> getOrganizationProfile(@PathVariable String orgName, @RequestHeader("Authorization") String token){
         try{

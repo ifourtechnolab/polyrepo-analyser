@@ -21,7 +21,6 @@ public class TokenController {
 
     private final Logger logger = LoggerFactory.getLogger(TokenController.class);
 
-    @CrossOrigin
     @GetMapping("/auth")
     public ResponseEntity<Map<String,String>> getToken(@RequestHeader("Authorization") String token){
         String responseValue;

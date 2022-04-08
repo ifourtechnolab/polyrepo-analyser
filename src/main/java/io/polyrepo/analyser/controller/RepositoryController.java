@@ -23,7 +23,6 @@ public class RepositoryController {
 
     private final Logger logger = LoggerFactory.getLogger(RepositoryController.class);
 
-    @CrossOrigin
     @GetMapping("/{orgUserName}/repo")
     public ResponseEntity<Map<String,Object>> getRepositories(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
@@ -37,7 +36,6 @@ public class RepositoryController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/{orgUserName}/repo/more")
     public ResponseEntity<Map<String,Object>> getRepositories(@PathVariable String orgUserName, @RequestHeader("Authorization") String token, @RequestHeader("EndCursor") String endCursor) {
         try {
@@ -51,7 +49,6 @@ public class RepositoryController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/{orgUserName}/repo/{repoName}")
     public ResponseEntity<Map<String,Object>> getRepositoriesByName(@PathVariable String orgUserName, @PathVariable String repoName, @RequestHeader("Authorization") String token) {
         try {

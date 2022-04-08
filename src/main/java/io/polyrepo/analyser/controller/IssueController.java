@@ -25,7 +25,6 @@ public class IssueController {
 
     private final Logger logger = LoggerFactory.getLogger(IssueController.class);
 
-    @CrossOrigin
     @PostMapping("/{orgUserName}/repo/issuesWithPriority1/openSinceBefore/{days}")
     public ResponseEntity<Map<String,Object>> getPriority1IssuesOpenedBeforeXDays(@PathVariable String orgUserName, @PathVariable int days, @RequestHeader("Authorization") String token, @RequestBody RepoNamesList repoNamesList) {
         try {
@@ -39,7 +38,6 @@ public class IssueController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/{orgUserName}/closedP1IssuesTime")
     public ResponseEntity<Map<String,Object>> getClosedP1IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
@@ -53,7 +51,6 @@ public class IssueController {
         }
     }
 
-    @CrossOrigin
     @GetMapping("/{orgUserName}/closedP2IssuesTime")
     public ResponseEntity<Map<String,Object>> getClosedP2IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
