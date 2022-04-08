@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
 import io.polyrepo.analyser.model.RepoName;
 import org.json.JSONException;
@@ -32,7 +33,7 @@ public class IssueService {
     @Autowired
     private GraphQLClient client;
 
-    private final Logger LOG = LoggerFactory.getLogger(IssueService.class);
+    private final Logger logger = LoggerFactory.getLogger(IssueService.class);
 
     /**
      * This method returns the list of priority-1 issues of the selected repositories by user
@@ -60,12 +61,12 @@ public class IssueService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String queryDateString = date.format(formatter);
         String query = String.format(getPriority1IssuesOpenedBeforeXDaysQuery, repoNamesString, queryDateString);
-        LOG.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
-        LOG.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
+        logger.info("List of selected repositories : " + repoNamesList);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
         return result.toMap();
     }
@@ -82,11 +83,11 @@ public class IssueService {
      */
     public Map<String, Object> getClosedP1IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP1IssuesTimeQuery, orgUserName);
-        LOG.info("Getting creation and closing time of priority-1 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-1 issues of organization : " + orgUserName);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
         return result.toMap();
 
@@ -104,11 +105,11 @@ public class IssueService {
      */
     public Map<String, Object> getClosedP2IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP2IssuesTimeQuery, orgUserName);
-        LOG.info("Getting creation and closing time of priority-2 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-2 issues of organization : " + orgUserName);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
         return result.toMap();
 

@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoName;
 import io.polyrepo.analyser.model.RepoNamesList;
 import org.json.JSONException;
@@ -30,7 +31,7 @@ public class PullRequestService {
     @Value("${getUnMergedPullRequestByDayQuery}")
     private String getUnMergedPullRequestByDayQuery;
 
-    private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
+    private final Logger logger = LoggerFactory.getLogger(PullRequestService.class);
 
     /**
      * This method will return the list of pull requests without activity since x days from the selected
@@ -57,13 +58,13 @@ public class PullRequestService {
         LocalDate date = LocalDate.now().minusDays(days);
         DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String queryDateString = date.format(formatters);
-        LOG.info("Getting list of pull requests without activity since " + queryDateString + " from organization: " + orgUserName);
-        LOG.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting list of pull requests without activity since " + queryDateString + " from organization: " + orgUserName);
+        logger.info("List of selected repositories : " + repoNamesList);
 
         String query = String.format(getPullRequestNotUpdatedByDaysQuery, repoNamesString, queryDateString);
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
         return result.toMap();
     }
@@ -92,13 +93,13 @@ public class PullRequestService {
         LocalDate date = LocalDate.now().minusDays(days);
         DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String queryDateString = date.format(formatters);
-        LOG.info("Getting list of pull requests not merged since " + queryDateString + " from organization: " + orgUserName);
-        LOG.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting list of pull requests not merged since " + queryDateString + " from organization: " + orgUserName);
+        logger.info("List of selected repositories : " + repoNamesList);
 
         String query = String.format(getUnMergedPullRequestByDayQuery, repoNamesString, queryDateString);
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
         return result.toMap();
 

@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class OrganizationService {
     @Value("${getOrganizationProfileQuery}")
     private String getOrganizationProfileQuery;
 
-    private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
+    private final Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
     /**
      * This method with fetch and returns the list of organizations that have the same name as mentioned name
@@ -38,8 +39,8 @@ public class OrganizationService {
     public Map<String, Object> getOrganizationList(String name, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationListQuery, name);
         ResponseEntity<String> response;
-        LOG.info("Getting list of organizations with \"" + name + "\" in name");
-        response = client.getQuery("Bearer " + token, query);
+        logger.info("Getting list of organizations with \"" + name + "\" in name");
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
         return result.toMap();
     }
@@ -56,8 +57,8 @@ public class OrganizationService {
     public Map<String, Object> getOrganizationProfile(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationProfileQuery, orgUserName);
         ResponseEntity<String> response;
-        LOG.info("Getting Organization profile of : " + orgUserName);
-        response = client.getQuery("Bearer " + token, query);
+        logger.info("Getting Organization profile of : " + orgUserName);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
         return result.toMap();
     }

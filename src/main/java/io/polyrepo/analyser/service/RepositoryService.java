@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class RepositoryService {
     @Value("${getRepositoriesByNameQuery}")
     private String getRepositoriesByNameQuery;
 
-    private final Logger LOG = LoggerFactory.getLogger(RepositoryService.class);
+    private final Logger logger = LoggerFactory.getLogger(RepositoryService.class);
 
     /**
      * Returns the total number of repositories the organization has
@@ -46,7 +47,7 @@ public class RepositoryService {
      */
     private int getRepositoryCount(String orgUserName, String token) {
         String query = String.format(getRepositoryCountQuery, orgUserName);
-        ResponseEntity<String> response = client.getQuery("Bearer " + token, query);
+        ResponseEntity<String> response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         return new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories").getInt("totalCount");
     }
 
@@ -65,17 +66,17 @@ public class RepositoryService {
         ResponseEntity<String> response;
 
         int count = getRepositoryCount(orgUserName, token);
-        LOG.info("Total count of repositories: " + count);
+        logger.info("Total count of repositories: " + count);
         if (count <= 100) {
-            LOG.info("Getting all the repositories");
+            logger.info("Getting all the repositories");
             String query = String.format(getRepositoriesQueryUnder100, orgUserName, count);
-            response = client.getQuery("Bearer " + token, query);
+            response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
             return result.toMap();
         } else {
-            LOG.info("Getting first 100 repositories");
+            logger.info("Getting first 100 repositories");
             String query = String.format(getRepositoriesQueryOver100, orgUserName);
-            response = client.getQuery("Bearer " + token, query);
+            response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
             JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
             return result.toMap();
         }
@@ -96,8 +97,8 @@ public class RepositoryService {
         String query = String.format(getRepositoriesByCursorQuery, orgUserName, endCursor);
         ResponseEntity<String> response;
 
-        LOG.info("Getting 100 repositories after the cursor \"" + endCursor + "\"");
-        response = client.getQuery("Bearer " + token, query);
+        logger.info("Getting 100 repositories after the cursor \"" + endCursor + "\"");
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
         return result.toMap();
     }
@@ -115,8 +116,8 @@ public class RepositoryService {
     public Map<String, Object> getRepositoriesByName(String orgUserName, String token, String repoName) throws FeignException, JSONException {
         String query = String.format(getRepositoriesByNameQuery, orgUserName, repoName);
         ResponseEntity<String> response;
-        LOG.info("Getting repositories by name : " + repoName);
-        response = client.getQuery("Bearer " + token, query);
+        logger.info("Getting repositories by name : " + repoName);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
         return result.toMap();
     }
