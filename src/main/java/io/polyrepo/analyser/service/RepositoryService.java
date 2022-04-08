@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class RepositoryService {
@@ -66,18 +67,18 @@ public class RepositoryService {
         ResponseEntity<String> response;
 
         int count = getRepositoryCount(orgUserName, token);
-        logger.info("Total count of repositories: " + count);
+        logger.info("Total count of repositories: {}" , count);
         if (count <= 100) {
             logger.info("Getting all the repositories");
             String query = String.format(getRepositoriesQueryUnder100, orgUserName, count);
             response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
+            JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_ORGANIZATION_KEY).getJSONObject(StringConstants.JSON_REPOSITORIES_KEY);
             return result.toMap();
         } else {
             logger.info("Getting first 100 repositories");
             String query = String.format(getRepositoriesQueryOver100, orgUserName);
             response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-            JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
+            JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_ORGANIZATION_KEY).getJSONObject(StringConstants.JSON_REPOSITORIES_KEY);
             return result.toMap();
         }
     }
@@ -97,9 +98,9 @@ public class RepositoryService {
         String query = String.format(getRepositoriesByCursorQuery, orgUserName, endCursor);
         ResponseEntity<String> response;
 
-        logger.info("Getting 100 repositories after the cursor \"" + endCursor + "\"");
+        logger.info("Getting 100 repositories after the cursor \" {} \"",endCursor);
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("organization").getJSONObject("repositories");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_ORGANIZATION_KEY).getJSONObject(StringConstants.JSON_REPOSITORIES_KEY);
         return result.toMap();
     }
 
@@ -110,15 +111,15 @@ public class RepositoryService {
      * @param token       GitHub personal access token
      * @param repoName    Repository name
      * @return List of repository of specified organization having the same name as specified name
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getRepositoriesByName(String orgUserName, String token, String repoName) throws FeignException, JSONException {
         String query = String.format(getRepositoriesByNameQuery, orgUserName, repoName);
         ResponseEntity<String> response;
-        logger.info("Getting repositories by name : " + repoName);
+        logger.info("Getting repositories by name : {}", repoName);
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
     }
 

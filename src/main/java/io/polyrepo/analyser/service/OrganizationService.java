@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OrganizationService {
@@ -39,9 +40,9 @@ public class OrganizationService {
     public Map<String, Object> getOrganizationList(String name, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationListQuery, name);
         ResponseEntity<String> response;
-        logger.info("Getting list of organizations with \"" + name + "\" in name");
+        logger.info("Getting list of organizations with \" {} \" in name",name);
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
     }
 
@@ -57,9 +58,9 @@ public class OrganizationService {
     public Map<String, Object> getOrganizationProfile(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationProfileQuery, orgUserName);
         ResponseEntity<String> response;
-        logger.info("Getting Organization profile of : " + orgUserName);
+        logger.info("Getting Organization profile of : {}" , orgUserName);
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
         return result.toMap();
     }
 }

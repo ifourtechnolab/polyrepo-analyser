@@ -4,8 +4,8 @@ import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
-import io.polyrepo.analyser.model.RepoName;
 import io.polyrepo.analyser.util.DateUtil;
+import io.polyrepo.analyser.util.QueryUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class IssueService {
@@ -47,24 +48,17 @@ public class IssueService {
      * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getPriority1IssuesOpenedBeforeXDays(String orgUserName, String token, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
-        StringBuilder repoNamesString = new StringBuilder();
-        for (RepoName r :
-                repoNamesList.getRepoNames()) {
-            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
-        }
-        if (repoNamesList.getRepoNames().isEmpty()) {
-            repoNamesString.append("org:").append(orgUserName);
-        }
+        StringBuilder repoNamesString = QueryUtil.getRepositoryListForQuery(repoNamesList,orgUserName);
 
         String queryDateString = DateUtil.calculateDateFromDays(days);
         String query = String.format(getPriority1IssuesOpenedBeforeXDaysQuery, repoNamesString, queryDateString);
-        logger.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
-        logger.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting priority-1 issues from selected repositories open since {}  from organization: {}", queryDateString, orgUserName);
+        logger.info("List of selected repositories : {}", repoNamesList);
 
         ResponseEntity<String> response;
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
     }
 
@@ -80,12 +74,12 @@ public class IssueService {
      */
     public Map<String, Object> getClosedP1IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP1IssuesTimeQuery, orgUserName);
-        logger.info("Getting creation and closing time of priority-1 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-1 issues of organization : {}", orgUserName);
 
         ResponseEntity<String> response;
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
 
     }
@@ -102,12 +96,12 @@ public class IssueService {
      */
     public Map<String, Object> getClosedP2IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP2IssuesTimeQuery, orgUserName);
-        logger.info("Getting creation and closing time of priority-2 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-2 issues of organization : {}", orgUserName);
 
         ResponseEntity<String> response;
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
 
     }

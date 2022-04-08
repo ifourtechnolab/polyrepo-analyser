@@ -3,9 +3,9 @@ package io.polyrepo.analyser.service;
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
 import io.polyrepo.analyser.constant.StringConstants;
-import io.polyrepo.analyser.model.RepoName;
 import io.polyrepo.analyser.model.RepoNamesList;
 import io.polyrepo.analyser.util.DateUtil;
+import io.polyrepo.analyser.util.QueryUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 
 @Service
@@ -45,24 +46,17 @@ public class PullRequestService {
      * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getPRNotUpdatedByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
-        StringBuilder repoNamesString = new StringBuilder();
-        for (RepoName r :
-                repoNamesList.getRepoNames()) {
-            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
-        }
-        if (repoNamesList.getRepoNames().isEmpty()) {
-            repoNamesString.append("org:").append(orgUserName);
-        }
+        StringBuilder repoNamesString = QueryUtil.getRepositoryListForQuery(repoNamesList,orgUserName);
 
         String queryDateString = DateUtil.calculateDateFromDays(days);
-        logger.info("Getting list of pull requests without activity since " + queryDateString + " from organization: " + orgUserName);
-        logger.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting list of pull requests without activity since {} from organization: {}", queryDateString, orgUserName);
+        logger.info("List of selected repositories : {}", repoNamesList);
 
         String query = String.format(getPullRequestNotUpdatedByDaysQuery, repoNamesString, queryDateString);
         ResponseEntity<String> response;
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
         return result.toMap();
     }
 
@@ -78,24 +72,17 @@ public class PullRequestService {
      * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getUnMergedPullRequestByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
-        StringBuilder repoNamesString = new StringBuilder();
-        for (RepoName r :
-                repoNamesList.getRepoNames()) {
-            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
-        }
-        if (repoNamesList.getRepoNames().isEmpty()) {
-            repoNamesString.append("org:").append(orgUserName);
-        }
+        StringBuilder repoNamesString = QueryUtil.getRepositoryListForQuery(repoNamesList,orgUserName);
 
         String queryDateString = DateUtil.calculateDateFromDays(days);
-        logger.info("Getting list of pull requests not merged since " + queryDateString + " from organization: " + orgUserName);
-        logger.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting list of pull requests not merged since {} from organization: {}",queryDateString, orgUserName);
+        logger.info("List of selected repositories : {}" , repoNamesList);
 
         String query = String.format(getUnMergedPullRequestByDayQuery, repoNamesString, queryDateString);
         ResponseEntity<String> response;
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
         return result.toMap();
 
     }
