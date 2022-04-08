@@ -33,8 +33,8 @@ public class OrganizationService {
      * @param name  GitHub Organization login name
      * @param token GitHub personal access token
      * @return List of organization
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getOrganizationList(String name, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationListQuery, name);
@@ -51,8 +51,8 @@ public class OrganizationService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return Profile details of specified organization
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getOrganizationProfile(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationProfileQuery, orgUserName);

@@ -5,6 +5,7 @@ import io.polyrepo.analyser.client.GraphQLClient;
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
 import io.polyrepo.analyser.model.RepoName;
+import io.polyrepo.analyser.util.DateUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
@@ -44,8 +43,8 @@ public class IssueService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days since before priority-1 issues are open
      * @return List of priority-1 issues open since before x date from selected repositories
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getPriority1IssuesOpenedBeforeXDays(String orgUserName, String token, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();
@@ -57,9 +56,7 @@ public class IssueService {
             repoNamesString.append("org:").append(orgUserName);
         }
 
-        LocalDate date = LocalDate.now().minusDays(days);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String queryDateString = date.format(formatter);
+        String queryDateString = DateUtil.calculateDateFromDays(days);
         String query = String.format(getPriority1IssuesOpenedBeforeXDaysQuery, repoNamesString, queryDateString);
         logger.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
         logger.info("List of selected repositories : " + repoNamesList);
@@ -78,8 +75,8 @@ public class IssueService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of priority-1 issues' creation and closing time
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getClosedP1IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP1IssuesTimeQuery, orgUserName);
@@ -100,8 +97,8 @@ public class IssueService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of priority-2 issues' creation and closing time
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getClosedP2IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP2IssuesTimeQuery, orgUserName);

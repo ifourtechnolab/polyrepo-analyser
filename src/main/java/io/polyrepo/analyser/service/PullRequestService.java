@@ -5,6 +5,7 @@ import io.polyrepo.analyser.client.GraphQLClient;
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoName;
 import io.polyrepo.analyser.model.RepoNamesList;
+import io.polyrepo.analyser.util.DateUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 
@@ -42,8 +41,8 @@ public class PullRequestService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days without activity in pull request
      * @return List of pull requests without activity since x days
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getPRNotUpdatedByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();
@@ -55,9 +54,7 @@ public class PullRequestService {
             repoNamesString.append("org:").append(orgUserName);
         }
 
-        LocalDate date = LocalDate.now().minusDays(days);
-        DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String queryDateString = date.format(formatters);
+        String queryDateString = DateUtil.calculateDateFromDays(days);
         logger.info("Getting list of pull requests without activity since " + queryDateString + " from organization: " + orgUserName);
         logger.info("List of selected repositories : " + repoNamesList);
 
@@ -77,8 +74,8 @@ public class PullRequestService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days without merged in pull requests
      * @return List of pull requests which are not merged since x days
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getUnMergedPullRequestByDays(String token, String orgUserName, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
         StringBuilder repoNamesString = new StringBuilder();
@@ -90,9 +87,7 @@ public class PullRequestService {
             repoNamesString.append("org:").append(orgUserName);
         }
 
-        LocalDate date = LocalDate.now().minusDays(days);
-        DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String queryDateString = date.format(formatters);
+        String queryDateString = DateUtil.calculateDateFromDays(days);
         logger.info("Getting list of pull requests not merged since " + queryDateString + " from organization: " + orgUserName);
         logger.info("List of selected repositories : " + repoNamesList);
 

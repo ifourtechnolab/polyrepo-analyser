@@ -59,8 +59,8 @@ public class RepositoryService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of repositories of specified organization
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getRepositories(String orgUserName, String token) throws FeignException, JSONException {
         ResponseEntity<String> response;
@@ -90,8 +90,8 @@ public class RepositoryService {
      * @param token       GitHub personal access token
      * @param endCursor   End cursor of repository list json
      * @return List of Repository of specified organization with pagination
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getRepositoriesByCursor(String orgUserName, String token, String endCursor) throws FeignException, JSONException {
         String query = String.format(getRepositoriesByCursorQuery, orgUserName, endCursor);
