@@ -2,8 +2,10 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
-import io.polyrepo.analyser.model.RepoName;
+import io.polyrepo.analyser.util.DateUtil;
+import io.polyrepo.analyser.util.QueryUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -13,9 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class IssueService {
@@ -32,7 +33,7 @@ public class IssueService {
     @Autowired
     private GraphQLClient client;
 
-    private final Logger LOG = LoggerFactory.getLogger(IssueService.class);
+    private final Logger logger = LoggerFactory.getLogger(IssueService.class);
 
     /**
      * This method returns the list of priority-1 issues of the selected repositories by user
@@ -43,30 +44,21 @@ public class IssueService {
      * @param repoNamesList List of Repositories selected by user
      * @param days          Number of days since before priority-1 issues are open
      * @return List of priority-1 issues open since before x date from selected repositories
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getPriority1IssuesOpenedBeforeXDays(String orgUserName, String token, RepoNamesList repoNamesList, int days) throws FeignException, JSONException {
-        StringBuilder repoNamesString = new StringBuilder();
-        for (RepoName r :
-                repoNamesList.getRepoNames()) {
-            repoNamesString.append("repo:").append(orgUserName).append("/").append(r.getName()).append(" ");
-        }
-        if (repoNamesList.getRepoNames().isEmpty()) {
-            repoNamesString.append("org:").append(orgUserName);
-        }
+        StringBuilder repoNamesString = QueryUtil.getRepositoryListForQuery(repoNamesList,orgUserName);
 
-        LocalDate date = LocalDate.now().minusDays(days);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String queryDateString = date.format(formatter);
+        String queryDateString = DateUtil.calculateDateFromDays(days);
         String query = String.format(getPriority1IssuesOpenedBeforeXDaysQuery, repoNamesString, queryDateString);
-        LOG.info("Getting priority-1 issues from selected repositories open since " + queryDateString + " from organization: " + orgUserName);
-        LOG.info("List of selected repositories : " + repoNamesList);
+        logger.info("Getting priority-1 issues from selected repositories open since {}  from organization: {}", queryDateString, orgUserName);
+        logger.info("List of selected repositories : {}", repoNamesList);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
     }
 
@@ -77,17 +69,17 @@ public class IssueService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of priority-1 issues' creation and closing time
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getClosedP1IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP1IssuesTimeQuery, orgUserName);
-        LOG.info("Getting creation and closing time of priority-1 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-1 issues of organization : {}", orgUserName);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
 
     }
@@ -99,17 +91,17 @@ public class IssueService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return List of priority-2 issues' creation and closing time
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getClosedP2IssuesTime(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getClosedP2IssuesTimeQuery, orgUserName);
-        LOG.info("Getting creation and closing time of priority-2 issues of organization : " + orgUserName);
+        logger.info("Getting creation and closing time of priority-2 issues of organization : {}", orgUserName);
 
         ResponseEntity<String> response;
 
-        response = client.getQuery("Bearer " + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
 
     }

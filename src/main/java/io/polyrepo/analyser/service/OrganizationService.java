@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OrganizationService {
@@ -24,7 +26,7 @@ public class OrganizationService {
     @Value("${getOrganizationProfileQuery}")
     private String getOrganizationProfileQuery;
 
-    private final Logger LOG = LoggerFactory.getLogger(OrganizationService.class);
+    private final Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
     /**
      * This method with fetch and returns the list of organizations that have the same name as mentioned name
@@ -32,15 +34,15 @@ public class OrganizationService {
      * @param name  GitHub Organization login name
      * @param token GitHub personal access token
      * @return List of organization
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getOrganizationList(String name, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationListQuery, name);
         ResponseEntity<String> response;
-        LOG.info("Getting list of organizations with \"" + name + "\" in name");
-        response = client.getQuery("Bearer " + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data").getJSONObject("search");
+        logger.info("Getting list of organizations with \" {} \" in name",name);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
         return result.toMap();
     }
 
@@ -50,15 +52,15 @@ public class OrganizationService {
      * @param orgUserName GitHub Organization login name
      * @param token       GitHub personal access token
      * @return Profile details of specified organization
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public Map<String, Object> getOrganizationProfile(String orgUserName, String token) throws FeignException, JSONException {
         String query = String.format(getOrganizationProfileQuery, orgUserName);
         ResponseEntity<String> response;
-        LOG.info("Getting Organization profile of : " + orgUserName);
-        response = client.getQuery("Bearer " + token, query);
-        JSONObject result = new JSONObject(response.getBody()).getJSONObject("data");
+        logger.info("Getting Organization profile of : {}" , orgUserName);
+        response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
+        JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
         return result.toMap();
     }
 }

@@ -8,8 +8,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySource("classpath:appGraphql.properties")
 public class ApplicationPropertyConfig {
+
     @Bean
-    public static PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
+    public PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
     }
 }

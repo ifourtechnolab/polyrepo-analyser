@@ -2,6 +2,7 @@ package io.polyrepo.analyser.service;
 
 import feign.FeignException;
 import io.polyrepo.analyser.client.GraphQLClient;
+import io.polyrepo.analyser.constant.StringConstants;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,22 +21,22 @@ public class TokenService {
     @Value("${validateTokenQuery}")
     private String validateTokenQuery;
 
-    private final Logger LOG = LoggerFactory.getLogger(TokenService.class);
+    private final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
     /**
      * Returns the response entity with the GitHub personal access token validation message
      * @param bearerToken GitHub personal access token
      * @return            the validation of personal access token
-     * @throws FeignException
-     * @throws JSONException
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     * @throws JSONException if JSON parsing is invalid
      */
     public String validateToken(String bearerToken) throws FeignException, JSONException{
         String responseValue = "";
 
-            LOG.info("Validating Bearer Token");
-            ResponseEntity<String> responseEntity = client.getQuery("Bearer " + bearerToken, validateTokenQuery);
+            logger.info("Validating Bearer Token");
+            ResponseEntity<String> responseEntity = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + bearerToken, validateTokenQuery);
             if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
-                LOG.info("Bearer Token Valid");
+                logger.info("Bearer Token Valid");
                 responseValue="Valid Token";
             }
         return responseValue;
