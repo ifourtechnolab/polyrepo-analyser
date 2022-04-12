@@ -21,9 +21,6 @@ import java.util.*;
 @Service
 public class LabelService {
 
-    @Value("${getLabelCountQuery}")
-    private String getLabelCountQuery;
-
     @Value("${getLabelsQuery}")
     private String getLabelsQuery;
 
