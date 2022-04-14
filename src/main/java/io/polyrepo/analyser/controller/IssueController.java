@@ -51,7 +51,7 @@ public class IssueController {
         }
     }
 
-    @GetMapping("/{orgUserName}/averageResolvingTimeOfP1Issues")
+    @GetMapping("/{orgUserName}/averageResolvingTimeOfP2Issues")
     public ResponseEntity<Map<String,String>> getAverageResolvingTimeOfP2Issues(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
             return new ResponseEntity<>(issueService.getAverageResolvingTimeOfP2Issues(orgUserName, token), HttpStatus.OK);
