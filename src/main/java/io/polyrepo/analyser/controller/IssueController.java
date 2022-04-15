@@ -38,10 +38,10 @@ public class IssueController {
         }
     }
 
-    @GetMapping("/{orgUserName}/closedP1IssuesTime")
-    public ResponseEntity<Map<String,Object>> getClosedP1IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
+    @GetMapping("/{orgUserName}/averageResolvingTimeOfP1Issues")
+    public ResponseEntity<Map<String,String>> getAverageResolvingTimeOfP1Issues(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
-            return new ResponseEntity<>(issueService.getClosedP1IssuesTime(orgUserName, token), HttpStatus.OK);
+            return new ResponseEntity<>(issueService.getAverageResolvingTimeOfP1Issues(orgUserName, token), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_UNAUTHORIZED_VALUE), HttpStatus.UNAUTHORIZED);
@@ -51,10 +51,10 @@ public class IssueController {
         }
     }
 
-    @GetMapping("/{orgUserName}/closedP2IssuesTime")
-    public ResponseEntity<Map<String,Object>> getClosedP2IssuesTime(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
+    @GetMapping("/{orgUserName}/averageResolvingTimeOfP2Issues")
+    public ResponseEntity<Map<String,String>> getAverageResolvingTimeOfP2Issues(@PathVariable String orgUserName, @RequestHeader("Authorization") String token) {
         try {
-            return new ResponseEntity<>(issueService.getClosedP2IssuesTime(orgUserName, token), HttpStatus.OK);
+            return new ResponseEntity<>(issueService.getAverageResolvingTimeOfP2Issues(orgUserName, token), HttpStatus.OK);
         } catch (FeignException.Unauthorized e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_UNAUTHORIZED_VALUE), HttpStatus.UNAUTHORIZED);
