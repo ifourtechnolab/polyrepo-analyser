@@ -1,6 +1,6 @@
 package io.polyrepo.analyser.service;
 
-import io.polyrepo.analyser.repository.IQueryRepository;
+import io.polyrepo.analyser.repository.QueryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 public class QueryService {
 
     @Autowired
-    IQueryRepository queryRepository;
+    QueryRepository queryRepository;
 
 
     public List<Map<String, Object>> getStoredQueries(int userId) throws IndexOutOfBoundsException{

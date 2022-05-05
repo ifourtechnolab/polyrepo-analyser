@@ -1,7 +1,7 @@
 package io.polyrepo.analyser.service;
 
 import io.polyrepo.analyser.model.User;
-import io.polyrepo.analyser.repository.IUserRepository;
+import io.polyrepo.analyser.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class UserService {
 
     @Autowired
-    IUserRepository userRepository;
+    UserRepository userRepository;
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
