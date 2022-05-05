@@ -2,6 +2,7 @@ package io.polyrepo.analyser.repository;
 
 import io.polyrepo.analyser.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,16 +18,21 @@ public class UserRepository implements IUserRepository{
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${findByEmailAndPasswordQuery}")
+    private String findByEmailAndPasswordQuery;
+
+    @Value("${saveUserQuery}")
+    private String saveUserQuery;
+
     @Override
     public void save(User user) throws DuplicateKeyException {
-        jdbcTemplate.update("INSERT INTO user (email, bearer_token, password) VALUES(?,?,?)",
-                    user.getEmail(), user.getBearerToken(), user.getPassword());
+        jdbcTemplate.update(saveUserQuery,
+                    user.getUserName(), user.getEmail(), user.getBearerToken(), user.getPassword());
     }
 
     @Override
     public List<Map<String, Object>> findByEmailAndPassword(String email, String password) throws IndexOutOfBoundsException {
-
-        String sql = String.format("SELECT user.id,user.bearer_token FROM user where user.email='%1$s' && user.password='%2$s'",email,password);
+        String sql = String.format(findByEmailAndPasswordQuery,email,password);
         return  jdbcTemplate.queryForList(sql);
     }
 }

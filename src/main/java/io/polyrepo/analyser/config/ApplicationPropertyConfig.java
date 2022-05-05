@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
-@PropertySource("classpath:appGraphql.properties")
+@PropertySource(value = {"classpath:appGraphql.properties","classpath:query.properties"})
 public class ApplicationPropertyConfig {
 
     @Bean
