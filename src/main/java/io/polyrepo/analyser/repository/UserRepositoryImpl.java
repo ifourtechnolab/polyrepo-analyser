@@ -1,6 +1,9 @@
 package io.polyrepo.analyser.repository;
 
 import io.polyrepo.analyser.model.User;
+import io.polyrepo.analyser.util.ConnectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -8,12 +11,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
+
+    private final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -24,15 +31,49 @@ public class UserRepositoryImpl implements UserRepository {
     @Value("${saveUserQuery}")
     private String saveUserQuery;
 
+    @Value("${updateBearerTokenQuery}")
+    private String updateBearerTokenQuery;
+
     @Override
-    public void save(User user) throws DuplicateKeyException {
-        jdbcTemplate.update(saveUserQuery,
-                    user.getUserName(), user.getEmail(), user.getBearerToken(), user.getPassword());
+    public void save(User user) throws DuplicateKeyException, SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(saveUserQuery)) {
+                preparedStatement.setString(1, user.getUserName());
+                preparedStatement.setString(2, user.getEmail());
+                preparedStatement.setString(3, user.getBearerToken());
+                preparedStatement.setString(4, user.getPassword());
+                preparedStatement.executeUpdate();
+            }
+        }
     }
 
     @Override
-    public List<Map<String, Object>> findByEmailAndPassword(String email, String password) throws IndexOutOfBoundsException {
-        String sql = String.format(findByEmailAndPasswordQuery,email,password);
-        return  jdbcTemplate.queryForList(sql);
+    public User findByEmailAndPassword(String email, String password) {
+        User user = new User();
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(findByEmailAndPasswordQuery)) {
+                preparedStatement.setString(1,email);
+                preparedStatement.setString(2,password);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    user.setId(resultSet.getInt("id"));
+                    user.setBearerToken(resultSet.getString("bearer_token"));
+                }
+            }
+        }catch (SQLException e){
+            logger.error(e.getMessage());
+        }
+        return user;
+    }
+
+    @Override
+    public int updateToken(int userid,String token) throws SQLException{
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(updateBearerTokenQuery)){
+                preparedStatement.setString(1,token);
+                preparedStatement.setInt(2,userid);
+                return preparedStatement.executeUpdate();
+            }
+        }
     }
 }
