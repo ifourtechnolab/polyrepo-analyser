@@ -4,10 +4,8 @@ import io.polyrepo.analyser.model.User;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 
@@ -21,9 +19,6 @@ import java.sql.SQLException;
 public class UserRepositoryImpl implements UserRepository {
 
     private final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Value("${findByEmailAndPasswordQuery}")
     private String findByEmailAndPasswordQuery;
