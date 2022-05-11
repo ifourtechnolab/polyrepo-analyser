@@ -4,13 +4,14 @@ import io.polyrepo.analyser.model.User;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
 
 
 @Repository
 public interface UserRepository {
-    void save(User user) throws DuplicateKeyException;
+    void save(User user) throws DuplicateKeyException, SQLException;
 
-    List<Map<String, Object>> findByEmailAndPassword(String email, String password) throws IndexOutOfBoundsException;
+    User findByEmailAndPassword(String email, String password) throws IndexOutOfBoundsException;
+
+    int updateToken(int userId, String token) throws SQLException;
 }
