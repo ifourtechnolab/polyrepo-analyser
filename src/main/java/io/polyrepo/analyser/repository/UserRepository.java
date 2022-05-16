@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 @Repository
 public interface UserRepository {
-    void save(User user) throws DuplicateKeyException, SQLException;
+    int save(User user) throws DuplicateKeyException, SQLException;
 
     User findByEmailAndPassword(String email, String password) throws IndexOutOfBoundsException;
 

@@ -30,14 +30,21 @@ public class UserRepositoryImpl implements UserRepository {
     private String updateBearerTokenQuery;
 
     @Override
-    public void save(User user) throws DuplicateKeyException, SQLException {
+    public int save(User user) throws DuplicateKeyException, SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
-            try(PreparedStatement preparedStatement = connection.prepareStatement(saveUserQuery)) {
+            try(PreparedStatement preparedStatement = connection.prepareStatement(saveUserQuery,java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, user.getUserName());
                 preparedStatement.setString(2, user.getEmail());
                 preparedStatement.setString(3, user.getBearerToken());
                 preparedStatement.setString(4, user.getPassword());
-                preparedStatement.executeUpdate();
+                int returnVal= preparedStatement.executeUpdate();
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                if(resultSet.next()){
+                    return resultSet.getInt(1);
+                }
+                else{
+                    return returnVal;
+                }
             }
         }
     }
@@ -53,6 +60,7 @@ public class UserRepositoryImpl implements UserRepository {
                 while (resultSet.next()) {
                     user.setId(resultSet.getInt("id"));
                     user.setBearerToken(resultSet.getString("bearer_token"));
+                    user.setUserName(resultSet.getString("user_name"));
                 }
             }
         }catch (SQLException e){
