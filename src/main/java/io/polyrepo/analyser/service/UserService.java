@@ -27,37 +27,40 @@ public class UserService {
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public void save(User user) throws DuplicateKeyException, SQLException {
-        userRepository.save(user);
-    }
-
-    public Map<String, Object> updateToken(User user) {
+    public Map<String, Object> save(User user) throws DuplicateKeyException, SQLException, FeignException, JSONException {
         Map<String, Object> response = new HashMap<>();
         String responseValue;
-        try{
-            responseValue = tokenService.validateToken(user.getBearerToken());
-            if(responseValue.equals("Valid Token")) {
-                int returnValue = userRepository.updateToken(user.getId(), user.getBearerToken());
-                if (returnValue > 0) {
-                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Token updated");
+        responseValue = tokenService.validateToken(user.getBearerToken());
+        if (responseValue.equals("Valid Token")) {
+            int returnVal = userRepository.save(user);
+            if (returnVal > 0) {
+                if (returnVal > 0) {
+                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User was created successfully.");
+                    response.put("id", returnVal);
+                    response.put("bearer_token", user.getBearerToken());
                 } else {
-                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Token update process failed");
+                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User creation process failed");
                 }
             }
-            return response;
-        }catch (FeignException.Unauthorized e){
-            response.put(StringConstants.JSON_MESSAGE_KEY_STRING,"Invalid Token");
-            logger.error(e.getMessage());
-            return response;
-        }catch (FeignException.BadRequest | JSONException e){
-            response.put(StringConstants.JSON_MESSAGE_KEY_STRING,"Bad Request");
-            logger.error(e.getMessage());
-            return response;
-        }catch (SQLException e){
-            response.put(StringConstants.JSON_MESSAGE_KEY_STRING,e.getMessage());
-            logger.error(e.getMessage());
-            return response;
         }
+        return response;
+
+
+    }
+
+    public Map<String, Object> updateToken(User user) throws FeignException, JSONException, SQLException {
+        Map<String, Object> response = new HashMap<>();
+        String responseValue;
+        responseValue = tokenService.validateToken(user.getBearerToken());
+        if (responseValue.equals("Valid Token")) {
+            int returnValue = userRepository.updateToken(user.getId(), user.getBearerToken());
+            if (returnValue > 0) {
+                response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Token updated");
+            } else {
+                response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Token update process failed");
+            }
+        }
+        return response;
     }
 
     public Map<String, Object> login(String email, String password) throws IndexOutOfBoundsException {
@@ -66,19 +69,20 @@ public class UserService {
         if (user.getBearerToken() != null) {
             userDetail.put("id", user.getId());
             userDetail.put("bearer_token", user.getBearerToken());
+            userDetail.put("user_name",user.getUserName());
             String responseValue;
-            try{
+            try {
                 responseValue = tokenService.validateToken(user.getBearerToken());
-            }catch (FeignException.Unauthorized e){
-                responseValue="Invalid Token";
+            } catch (FeignException.Unauthorized e) {
+                responseValue = "Invalid Token";
                 logger.error(e.getMessage());
-            }catch (FeignException.BadRequest | JSONException e){
-                responseValue="Bad Request";
+            } catch (FeignException.BadRequest | JSONException e) {
+                responseValue = "Bad Request";
                 logger.error(e.getMessage());
             }
-            userDetail.put("token_validation",responseValue);
+            userDetail.put("token_validation", responseValue);
             userDetail.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User Found");
-            logger.info("User Info: {} , {}", user.getId(),user.getBearerToken());
+            logger.info("User Info: {} , {}", user.getId(), user.getBearerToken());
         } else {
             userDetail.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User Not Found");
         }
