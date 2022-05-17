@@ -11,7 +11,6 @@ import io.polyrepo.analyser.util.ParameterName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -44,10 +43,9 @@ public class QueryService {
      * @param orgName GitHub Organization login name
      * @param days Number of days for filter
      * @return map with status of database operation
-     * @throws DuplicateKeyException if data with same primary key exists in database
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days) throws DuplicateKeyException, SQLException{
+    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days, String label) throws SQLException{
         logger.info("Saving query in database");
         int storedQueryId = queryRepository.saveStoredQuery(storedQuery);
         if(storedQueryId>0){
