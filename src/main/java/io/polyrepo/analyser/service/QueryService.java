@@ -1,9 +1,21 @@
 package io.polyrepo.analyser.service;
 
+import io.polyrepo.analyser.constant.StringConstants;
+import io.polyrepo.analyser.model.QueryParameter;
+import io.polyrepo.analyser.model.RepoNamesList;
+import io.polyrepo.analyser.model.StoredQueries;
+import io.polyrepo.analyser.repository.ParameterRepository;
 import io.polyrepo.analyser.repository.QueryRepository;
+import io.polyrepo.analyser.repository.StoredRepoRepository;
+import io.polyrepo.analyser.util.ParameterName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +25,45 @@ public class QueryService {
     @Autowired
     QueryRepository queryRepository;
 
+    @Autowired
+    ParameterRepository parameterRepository;
+
+    @Autowired
+    StoredRepoRepository storedRepoRepository;
+
+    private final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
     public List<Map<String, Object>> getStoredQueries(int userId) throws IndexOutOfBoundsException{
         return queryRepository.getStoredQueries(userId);
+    }
+
+    /**
+     * This method will call repository to save query, parameter and repolist in database
+     * @param storedQueries Save query details
+     * @param repoNamesList List of Repositories selected by user
+     * @param orgName GitHub Organization login name
+     * @param days Number of days for filter
+     * @return map with status of database operation
+     * @throws DuplicateKeyException if data with same primary key exists in database
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String,Object> saveQueries(StoredQueries storedQueries, RepoNamesList repoNamesList, String orgName, Integer days) throws DuplicateKeyException, SQLException{
+        logger.info("Saving query in database");
+        int storedQueryId = queryRepository.saveStoredQuery(storedQueries);
+        if(storedQueryId>0){
+            logger.info("Saving parameter in database");
+            parameterRepository.saveParameter(new QueryParameter(ParameterName.ORGNAME.getParamName(), orgName,storedQueryId));
+            if(days!=null){
+                parameterRepository.saveParameter(new QueryParameter(ParameterName.DAYS.getParamName(), days.toString(),storedQueryId));
+            }
+            if(repoNamesList!=null){
+                logger.info("Saving Repolist in database");
+                storedRepoRepository.saveRepoNameList(repoNamesList,storedQueryId);
+            }
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query saved successfully");
+        }
+        else{
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query not saved");
+        }
     }
 }
