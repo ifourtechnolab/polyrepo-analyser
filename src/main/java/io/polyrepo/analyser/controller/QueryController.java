@@ -7,12 +7,12 @@ import io.polyrepo.analyser.service.QueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +48,11 @@ public class QueryController {
      * @return ResponseEntity with database operation status
      */
     @PostMapping("/saveQuery")
-    public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgName, @RequestParam(required = false) Integer days){
+    public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgName, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
         try {
             logger.info("Save query of user");
-            return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgName, days), HttpStatus.OK);
-        }catch (DuplicateKeyException e ){
+            return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgName, days, label), HttpStatus.OK);
+        }catch (SQLIntegrityConstraintViolationException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
         } catch (SQLException e) {
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Process Failed"),HttpStatus.OK);
