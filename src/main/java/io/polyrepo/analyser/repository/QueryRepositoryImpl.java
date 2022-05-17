@@ -4,8 +4,6 @@ import io.polyrepo.analyser.model.StoredQuery;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -18,8 +16,6 @@ import java.util.Map;
 @Repository
 public class QueryRepositoryImpl implements QueryRepository {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Value("${saveStoredQuery}")
     private String saveStoredQuery;
@@ -37,11 +33,10 @@ public class QueryRepositoryImpl implements QueryRepository {
      * This method will save stored query details in database
      * @param storedQuery stored query details
      * @return the primary key of stored query
-     * @throws DuplicateKeyException if data with same primary key exists in database
      * @throws SQLException if error occurs in database operation
      */
     @Override
-    public int saveStoredQuery(StoredQuery storedQuery) throws DuplicateKeyException, SQLException {
+    public int saveStoredQuery(StoredQuery storedQuery) throws  SQLException {
         try(Connection connection= ConnectionUtil.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(saveStoredQuery,java.sql.Statement.RETURN_GENERATED_KEYS)){
                 preparedStatement.setString(1,storedQuery.getTitle());
