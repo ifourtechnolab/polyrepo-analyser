@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +33,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> createUser(@RequestBody User user) {
         try {
             return new ResponseEntity<>(userService.save(new User(user.getUserName(), user.getEmail(), user.getBearerToken(), user.getPassword())), HttpStatus.OK);
-        } catch (DuplicateKeyException | SQLIntegrityConstraintViolationException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
             logger.error(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Email Already Used"), HttpStatus.OK);
         } catch (FeignException.Unauthorized e){

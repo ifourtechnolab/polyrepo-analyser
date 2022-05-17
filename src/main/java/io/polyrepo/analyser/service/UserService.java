@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -27,25 +26,21 @@ public class UserService {
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public Map<String, Object> save(User user) throws DuplicateKeyException, SQLException, FeignException, JSONException {
+    public Map<String, Object> save(User user) throws SQLException, FeignException, JSONException {
         Map<String, Object> response = new HashMap<>();
         String responseValue;
         responseValue = tokenService.validateToken(user.getBearerToken());
         if (responseValue.equals("Valid Token")) {
             int returnVal = userRepository.save(user);
             if (returnVal > 0) {
-                if (returnVal > 0) {
-                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User was created successfully.");
-                    response.put("id", returnVal);
-                    response.put("bearer_token", user.getBearerToken());
-                } else {
-                    response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User creation process failed");
-                }
+                response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User was created successfully.");
+                response.put("id", returnVal);
+                response.put("bearer_token", user.getBearerToken());
+            } else {
+                response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User creation process failed");
             }
         }
         return response;
-
-
     }
 
     public Map<String, Object> updateToken(User user) throws FeignException, JSONException, SQLException {
@@ -69,7 +64,7 @@ public class UserService {
         if (user.getBearerToken() != null) {
             userDetail.put("id", user.getId());
             userDetail.put("bearer_token", user.getBearerToken());
-            userDetail.put("user_name",user.getUserName());
+            userDetail.put("user_name", user.getUserName());
             String responseValue;
             try {
                 responseValue = tokenService.validateToken(user.getBearerToken());

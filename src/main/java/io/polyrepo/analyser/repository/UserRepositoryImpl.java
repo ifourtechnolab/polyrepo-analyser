@@ -5,7 +5,6 @@ import io.polyrepo.analyser.util.ConnectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 
@@ -30,7 +29,7 @@ public class UserRepositoryImpl implements UserRepository {
     private String updateBearerTokenQuery;
 
     @Override
-    public int save(User user) throws DuplicateKeyException, SQLException {
+    public int save(User user) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(saveUserQuery,java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, user.getUserName());
