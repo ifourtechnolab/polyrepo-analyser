@@ -12,5 +12,5 @@ public class StringConstants {
     public static final String JSON_ORGANIZATION_KEY="organization";
     public static final String JSON_REPOSITORIES_KEY="repositories";
     public static final String JSON_REPOSITORY_KEY="Repository";    // "Repository" not "repository"
-
+    public static final String JSON_QUERYKEY_KEY="queryKey";
 }
