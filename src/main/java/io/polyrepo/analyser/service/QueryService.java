@@ -54,6 +54,9 @@ public class QueryService {
             if(days!=null){
                 parameterRepository.saveParameter(new QueryParameter(ParameterName.DAYS.getParamName(), days.toString(),storedQueryId));
             }
+            if(label!=null){
+                parameterRepository.saveParameter(new QueryParameter(ParameterName.LABEL.getParamName(), label,storedQueryId));
+            }
             if(repoNamesList!=null){
                 logger.info("Saving Repolist in database");
                 storedRepoRepository.saveRepoNameList(repoNamesList,storedQueryId);
