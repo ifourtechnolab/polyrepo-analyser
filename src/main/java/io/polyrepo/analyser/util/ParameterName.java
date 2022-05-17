@@ -2,7 +2,8 @@ package io.polyrepo.analyser.util;
 
 public enum ParameterName {
     ORGNAME("orgName"),
-    DAYS("days");
+    DAYS("days"),
+    LABEL("label");
 
     private final String paramName;
 
