@@ -1,6 +1,6 @@
 package io.polyrepo.analyser.repository;
 
-import io.polyrepo.analyser.model.StoredQueries;
+import io.polyrepo.analyser.model.StoredQuery;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,18 +35,18 @@ public class QueryRepositoryImpl implements QueryRepository {
 
     /**
      * This method will save stored query details in database
-     * @param storedQueries stored query details
+     * @param storedQuery stored query details
      * @return the primary key of stored query
      * @throws DuplicateKeyException if data with same primary key exists in database
      * @throws SQLException if error occurs in database operation
      */
     @Override
-    public int saveStoredQuery(StoredQueries storedQueries) throws DuplicateKeyException, SQLException {
+    public int saveStoredQuery(StoredQuery storedQuery) throws DuplicateKeyException, SQLException {
         try(Connection connection= ConnectionUtil.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(saveStoredQuery,java.sql.Statement.RETURN_GENERATED_KEYS)){
-                preparedStatement.setString(1,storedQueries.getTitle());
-                preparedStatement.setString(2,storedQueries.getQueryKey());
-                preparedStatement.setInt(3,storedQueries.getUserId());
+                preparedStatement.setString(1,storedQuery.getTitle());
+                preparedStatement.setString(2,storedQuery.getQueryKey());
+                preparedStatement.setInt(3,storedQuery.getUserId());
                 int returnVal= preparedStatement.executeUpdate();
                 ResultSet resultSet = preparedStatement.getGeneratedKeys();
                 if(resultSet.next()){

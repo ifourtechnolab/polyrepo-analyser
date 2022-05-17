@@ -1,6 +1,6 @@
 package io.polyrepo.analyser.repository;
 
-import io.polyrepo.analyser.model.StoredQueries;
+import io.polyrepo.analyser.model.StoredQuery;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +14,5 @@ public interface QueryRepository {
 
     List<Map<String, Object>> getStoredQueries(int userId) throws IndexOutOfBoundsException;
 
-    int saveStoredQuery(StoredQueries storedQueries)throws DuplicateKeyException, SQLException;
+    int saveStoredQuery(StoredQuery storedQuery)throws DuplicateKeyException, SQLException;
 }

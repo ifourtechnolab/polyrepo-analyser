@@ -2,7 +2,7 @@ package io.polyrepo.analyser.controller;
 
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
-import io.polyrepo.analyser.model.StoredQueries;
+import io.polyrepo.analyser.model.StoredQuery;
 import io.polyrepo.analyser.service.QueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class QueryController {
     public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgName, @RequestParam(required = false) Integer days){
         try {
             logger.info("Save query of user");
-            return new ResponseEntity<>(queryService.saveQueries(new StoredQueries(title,queryKey,userId), repoNamesList, orgName, days), HttpStatus.OK);
+            return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgName, days), HttpStatus.OK);
         }catch (DuplicateKeyException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
         } catch (SQLException e) {

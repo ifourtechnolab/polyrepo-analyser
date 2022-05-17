@@ -3,7 +3,7 @@ package io.polyrepo.analyser.service;
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.QueryParameter;
 import io.polyrepo.analyser.model.RepoNamesList;
-import io.polyrepo.analyser.model.StoredQueries;
+import io.polyrepo.analyser.model.StoredQuery;
 import io.polyrepo.analyser.repository.ParameterRepository;
 import io.polyrepo.analyser.repository.QueryRepository;
 import io.polyrepo.analyser.repository.StoredRepoRepository;
@@ -39,7 +39,7 @@ public class QueryService {
 
     /**
      * This method will call repository to save query, parameter and repolist in database
-     * @param storedQueries Save query details
+     * @param storedQuery Save query details
      * @param repoNamesList List of Repositories selected by user
      * @param orgName GitHub Organization login name
      * @param days Number of days for filter
@@ -47,9 +47,9 @@ public class QueryService {
      * @throws DuplicateKeyException if data with same primary key exists in database
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String,Object> saveQueries(StoredQueries storedQueries, RepoNamesList repoNamesList, String orgName, Integer days) throws DuplicateKeyException, SQLException{
+    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days) throws DuplicateKeyException, SQLException{
         logger.info("Saving query in database");
-        int storedQueryId = queryRepository.saveStoredQuery(storedQueries);
+        int storedQueryId = queryRepository.saveStoredQuery(storedQuery);
         if(storedQueryId>0){
             logger.info("Saving parameter in database");
             parameterRepository.saveParameter(new QueryParameter(ParameterName.ORGNAME.getParamName(), orgName,storedQueryId));
