@@ -56,4 +56,14 @@ public class QueryController {
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Process Failed"),HttpStatus.OK);
         }
     }
+
+    @GetMapping("/deleteQuery/{queryId}")
+    public ResponseEntity<Map<String,String>> deleteQuery(@PathVariable int queryId){
+        try{
+            logger.info("Deleting stored query");
+            return new ResponseEntity<>(queryService.deleteQuery(queryId),HttpStatus.OK);
+        }catch (SQLException e){
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Process failed"),HttpStatus.OK);
+        }
+    }
 }
