@@ -72,4 +72,13 @@ public class QueryService {
             return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query not saved");
         }
     }
+
+    public Map<String,String> deleteQuery(int queryId) throws SQLException{
+        int returnVal = queryRepository.deleteStoredQuery(queryId);
+        if(returnVal>0){
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query deleted");
+        }else{
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query not deleted");
+        }
+    }
 }
