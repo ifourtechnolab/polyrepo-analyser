@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,14 +25,13 @@ public class QueryController {
 
     private final Logger logger = LoggerFactory.getLogger(QueryController.class);
 
-    @PostMapping("/storedQueries/{userId}")
-    public ResponseEntity<List<Map<String, Object>>> getStoredQueries(@PathVariable int userId){
+    @GetMapping("/storedQueries/{userId}")
+    public ResponseEntity<Map<String, Object>> getStoredQueries(@PathVariable int userId){
         try{
-            List<Map<String, Object>> response = queryService.getStoredQueries(userId);
-            logger.info("List of stored queries : {}",response);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (IndexOutOfBoundsException e){
-            return new ResponseEntity<>(Collections.singletonList(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Stored Queries")),HttpStatus.OK);
+            logger.info("Getting list of stored queries");
+            return new ResponseEntity<>(queryService.getStoredQueries(userId), HttpStatus.OK);
+        } catch ( SQLException e){
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Stored Queries"),HttpStatus.OK);
         }
     }
 
