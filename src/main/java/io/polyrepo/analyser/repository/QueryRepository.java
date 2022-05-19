@@ -13,4 +13,6 @@ public interface QueryRepository {
     Map<String, Object> getStoredQueries(int userId) throws SQLException;
 
     int saveStoredQuery(StoredQuery storedQuery)throws SQLException;
+
+    int deleteStoredQuery(int queryId)throws SQLException;
 }
