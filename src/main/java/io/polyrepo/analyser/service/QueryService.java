@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -32,7 +31,13 @@ public class QueryService {
 
     private final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
-    public List<Map<String, Object>> getStoredQueries(int userId) throws IndexOutOfBoundsException{
+    /**
+     * This method get all the details of stored queries of current user
+     * @param userId Current user id
+     * @return Map with the details of stored queries
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> getStoredQueries(int userId) throws SQLException {
         return queryRepository.getStoredQueries(userId);
     }
 
