@@ -1,6 +1,9 @@
 package io.polyrepo.analyser.repository;
 
+import io.polyrepo.analyser.model.QueryParameter;
+import io.polyrepo.analyser.model.QueryRepo;
 import io.polyrepo.analyser.model.StoredQuery;
+import io.polyrepo.analyser.model.StoredQueryList;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -15,11 +18,24 @@ import java.util.Map;
 @Repository
 public class QueryRepositoryImpl implements QueryRepository {
 
-
     @Value("${saveStoredQuery}")
     private String saveStoredQuery;
 
+    @Value("${fetchStoredQueryJoinQuery}")
+    private String fetchStoredQueryJoinQuery;
 
+    @Value("${deletePramRepoQuery}")
+    private String deletePramRepoQuery;
+
+    @Value("${deleteStoredQuery}")
+    private String deleteStoredQuery;
+
+    /**
+     * This method will fetch all the stored queries with parameters and repository list of a user using join query
+     * @param userId Current user id
+     * @return List of stored queries
+     * @throws SQLException if error occurs in database operation
+     */
     @Override
     public Map<String, Object> getStoredQueries(int userId) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
@@ -71,6 +87,40 @@ public class QueryRepositoryImpl implements QueryRepository {
                 }
                 else{
                     return returnVal;
+                }
+            }
+        }
+    }
+
+    /**
+     * This method will delete stored query alongside its parameter and repo name list
+     * @param queryId id of query to be deleted
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int deleteStoredQuery(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            connection.setAutoCommit(false);
+            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramRepoQuery)){
+                preparedStatement.setInt(1,queryId);
+                int paramRepoVal = preparedStatement.executeUpdate();
+                if( paramRepoVal>0){
+                    try(PreparedStatement prepared = connection.prepareStatement(deleteStoredQuery)){
+                        prepared.setInt(1,queryId);
+                        int queryVal = prepared.executeUpdate();
+                        if(queryVal>0) {
+                            connection.setAutoCommit(true);
+                            return queryVal;
+                        }
+                        else{
+                            connection.rollback();
+                            return 0;
+                        }
+                    }
+                }else{
+                    connection.rollback();
+                    return 0;
                 }
             }
         }
