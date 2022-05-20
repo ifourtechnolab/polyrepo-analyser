@@ -1,9 +1,11 @@
 package io.polyrepo.analyser.controller;
 
+import feign.FeignException;
 import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.RepoNamesList;
 import io.polyrepo.analyser.model.StoredQuery;
 import io.polyrepo.analyser.service.QueryService;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,15 +48,16 @@ public class QueryController {
      * @param userId User id
      * @param queryKey Query key to identify the analysis
      * @param repoNamesList List of Repositories selected by user
-     * @param orgName GitHub Organization login name
+     * @param orgUserName GitHub Organization login name
      * @param days Number of days for filter
+     * @param label Label for filter
      * @return ResponseEntity with database operation status
      */
     @PostMapping("/saveQuery")
-    public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgName, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
+    public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgUserName, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
         try {
             logger.info("Save query of user");
-            return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgName, days, label), HttpStatus.OK);
+            return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgUserName, days, label), HttpStatus.OK);
         }catch (SQLIntegrityConstraintViolationException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
         } catch (SQLException e) {
@@ -74,6 +77,30 @@ public class QueryController {
             return new ResponseEntity<>(queryService.deleteQuery(queryId),HttpStatus.OK);
         }catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Process failed"),HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Endpoint to get result of stored query
+     * @param token GitHub personal access token
+     * @param queryId stored query id
+     * @param queryKey Query key to identify the analysis
+     * @param orgUserName GitHub Organization login name
+     * @param days Number of days for filter
+     * @param label Label for filter
+     * @param repoNamesList List of Repositories selected by user
+     * @return ResponseEntity with the result of stored query
+     */
+    @PostMapping("/queryResult/{queryId}")
+    public ResponseEntity<Map<String,Object>> getQueryResult(@RequestHeader("Authorization") String token,@PathVariable int queryId,@RequestParam String queryKey,@RequestParam String orgUserName,@RequestParam(required = false) Integer days,@RequestParam(required = false) String label,@RequestBody(required = false) RepoNamesList repoNamesList){
+        try{
+            return new ResponseEntity<>(queryService.getQueryResult(token,queryId,queryKey,orgUserName,days,label,repoNamesList),HttpStatus.OK);
+        }catch (FeignException.Unauthorized e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_UNAUTHORIZED_VALUE), HttpStatus.UNAUTHORIZED);
+        } catch (FeignException.BadRequest | JSONException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_BAD_REQUEST_VALUE), HttpStatus.BAD_REQUEST);
         }
     }
 }
