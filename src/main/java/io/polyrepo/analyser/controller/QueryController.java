@@ -25,7 +25,12 @@ public class QueryController {
 
     private final Logger logger = LoggerFactory.getLogger(QueryController.class);
 
-    @GetMapping("/storedQueries/{userId}")
+    /**
+     * Endpoint to get all the stored queries of current user
+     * @param userId Current user id
+     * @return ResponseEntity with the list of stored queries
+     */
+    @GetMapping("/getQueries/{userId}")
     public ResponseEntity<Map<String, Object>> getStoredQueries(@PathVariable int userId){
         try{
             logger.info("Getting list of stored queries");
@@ -57,6 +62,11 @@ public class QueryController {
         }
     }
 
+    /**
+     * Endpoint to delete particular stored query with its parameter and repo names list
+     * @param queryId id of the query to be deleted
+     * @return Response entity with the database operation status
+     */
     @GetMapping("/deleteQuery/{queryId}")
     public ResponseEntity<Map<String,String>> deleteQuery(@PathVariable int queryId){
         try{
