@@ -1,6 +1,9 @@
 package io.polyrepo.analyser.repository;
 
+import io.polyrepo.analyser.model.QueryParameter;
+import io.polyrepo.analyser.model.QueryRepo;
 import io.polyrepo.analyser.model.StoredQuery;
+import io.polyrepo.analyser.model.StoredQueryList;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -9,21 +12,59 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Repository
 public class QueryRepositoryImpl implements QueryRepository {
 
-
     @Value("${saveStoredQuery}")
     private String saveStoredQuery;
 
+    @Value("${fetchStoredQueryJoinQuery}")
+    private String fetchStoredQueryJoinQuery;
 
+    @Value("${deletePramRepoQuery}")
+    private String deletePramRepoQuery;
+
+    @Value("${deleteStoredQuery}")
+    private String deleteStoredQuery;
+
+    /**
+     * This method will fetch all the stored queries with parameters and repository list of a user using join query
+     * @param userId Current user id
+     * @return List of stored queries
+     * @throws SQLException if error occurs in database operation
+     */
     @Override
-    public List<Map<String, Object>> getStoredQueries(int userId) throws IndexOutOfBoundsException {
-        return new ArrayList<>();
+    public Map<String, Object> getStoredQueries(int userId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(fetchStoredQueryJoinQuery)) {
+                preparedStatement.setInt(1,userId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                Map<String,Object> resultMap = new HashMap<>();
+                while (resultSet.next()){
+                    if(resultMap.containsKey(String.valueOf(resultSet.getInt("q_id")))){
+                        StoredQueryList storedQueryList = (StoredQueryList) resultMap.get(String.valueOf(resultSet.getInt("q_id")));
+                        storedQueryList.addToQueryParameter(new QueryParameter(resultSet.getString("param_name"),resultSet.getString("param_value"),resultSet.getInt("q_id")));
+                        storedQueryList.addToQueryRepoList(new QueryRepo(resultSet.getString("name"),resultSet.getInt("q_id")));
+                        resultMap.replace(String.valueOf(resultSet.getInt("q_id")),storedQueryList);
+                    }
+                    else {
+                        StoredQueryList storedQueryList = new StoredQueryList();
+                        StoredQuery storedQuery = new StoredQuery();
+                        storedQuery.setId(resultSet.getInt("q_id"));
+                        storedQuery.setTitle(resultSet.getString("title"));
+                        storedQuery.setQueryKey(resultSet.getString("query"));
+                        storedQueryList.setStoredQuery(storedQuery);
+                        storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString("param_name"),resultSet.getString("param_value"),storedQuery.getId()));
+                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString("name"),storedQuery.getId()));
+                        resultMap.put(String.valueOf(storedQuery.getId()), storedQueryList);
+                    }
+                }
+                return resultMap;
+            }
+        }
     }
 
     /**
@@ -46,6 +87,40 @@ public class QueryRepositoryImpl implements QueryRepository {
                 }
                 else{
                     return returnVal;
+                }
+            }
+        }
+    }
+
+    /**
+     * This method will delete stored query alongside its parameter and repo name list
+     * @param queryId id of query to be deleted
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int deleteStoredQuery(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            connection.setAutoCommit(false);
+            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramRepoQuery)){
+                preparedStatement.setInt(1,queryId);
+                int paramRepoVal = preparedStatement.executeUpdate();
+                if( paramRepoVal>0){
+                    try(PreparedStatement prepared = connection.prepareStatement(deleteStoredQuery)){
+                        prepared.setInt(1,queryId);
+                        int queryVal = prepared.executeUpdate();
+                        if(queryVal>0) {
+                            connection.setAutoCommit(true);
+                            return queryVal;
+                        }
+                        else{
+                            connection.rollback();
+                            return 0;
+                        }
+                    }
+                }else{
+                    connection.rollback();
+                    return 0;
                 }
             }
         }
