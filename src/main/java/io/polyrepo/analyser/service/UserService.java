@@ -48,7 +48,7 @@ public class UserService {
         String responseValue;
         responseValue = tokenService.validateToken(user.getBearerToken());
         if (responseValue.equals("Valid Token")) {
-            int returnValue = userRepository.updateToken(user.getId(), user.getBearerToken());
+            int returnValue = userRepository.updateToken(user.getUserId(), user.getBearerToken());
             if (returnValue > 0) {
                 response.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Token updated");
             } else {
@@ -62,7 +62,7 @@ public class UserService {
         User user = userRepository.findByEmailAndPassword(email, password);
         Map<String, Object> userDetail = new HashMap<>();
         if (user.getBearerToken() != null) {
-            userDetail.put("id", user.getId());
+            userDetail.put("id", user.getUserId());
             userDetail.put("bearer_token", user.getBearerToken());
             userDetail.put("user_name", user.getUserName());
             String responseValue;
@@ -77,7 +77,7 @@ public class UserService {
             }
             userDetail.put("token_validation", responseValue);
             userDetail.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User Found");
-            logger.info("User Info: {} , {}", user.getId(), user.getBearerToken());
+            logger.info("User Info: {} , {}", user.getUserId(), user.getBearerToken());
         } else {
             userDetail.put(StringConstants.JSON_MESSAGE_KEY_STRING, "User Not Found");
         }
