@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
 
-    private int id;
+    private int userId;
     private String userName;
     private String email;
     private String bearerToken;

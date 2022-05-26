@@ -53,13 +53,13 @@ public class QueryRepositoryImpl implements QueryRepository {
                     else {
                         StoredQueryList storedQueryList = new StoredQueryList();
                         StoredQuery storedQuery = new StoredQuery();
-                        storedQuery.setId(resultSet.getInt("q_id"));
+                        storedQuery.setQueryId(resultSet.getInt("q_id"));
                         storedQuery.setTitle(resultSet.getString("title"));
                         storedQuery.setQueryKey(resultSet.getString("query"));
                         storedQueryList.setStoredQuery(storedQuery);
-                        storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString("param_name"),resultSet.getString("param_value"),storedQuery.getId()));
-                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString("name"),storedQuery.getId()));
-                        resultMap.put(String.valueOf(storedQuery.getId()), storedQueryList);
+                        storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString("param_name"),resultSet.getString("param_value"),storedQuery.getQueryId()));
+                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString("name"),storedQuery.getQueryId()));
+                        resultMap.put(String.valueOf(storedQuery.getQueryId()), storedQueryList);
                     }
                 }
                 return resultMap;

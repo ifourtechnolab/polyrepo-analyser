@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class StoredQueryList {
     private StoredQuery storedQuery;
+    private String bearerToken;
     private List<QueryParameter> queryParameterList;
     private List<QueryRepo> queryRepoList;
 

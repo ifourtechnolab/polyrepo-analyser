@@ -57,7 +57,7 @@ public class UserRepositoryImpl implements UserRepository {
                 preparedStatement.setString(2,password);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
-                    user.setId(resultSet.getInt("id"));
+                    user.setUserId(resultSet.getInt("id"));
                     user.setBearerToken(resultSet.getString("bearer_token"));
                     user.setUserName(resultSet.getString("user_name"));
                 }
