@@ -77,7 +77,7 @@ public class QueryRepositoryImpl implements QueryRepository {
                         storedQuery.setQueryKey(resultSet.getString(StringConstants.COLUMN_QUERY_LABEL));
                         storedQueryList.setStoredQuery(storedQuery);
                         storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),storedQuery.getQueryId()));
-                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString("name"),storedQuery.getQueryId()));
+                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),storedQuery.getQueryId()));
                         resultMap.put(String.valueOf(storedQuery.getQueryId()), storedQueryList);
                     }
                 }
@@ -238,22 +238,22 @@ public class QueryRepositoryImpl implements QueryRepository {
                 Map<String,Object> resultMap = new HashMap<>();
                 while (resultSet.next()){
                     if(resultMap.containsKey(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)))){
-                        StoredQueryList storedQueryList = (StoredQueryList) resultMap.get(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
-                        storedQueryList.addToQueryParameter(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
-                        storedQueryList.addToQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
-                        resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),storedQueryList);
+                        StoredQueryList storedQueryListOfTrendCapturedQueries = (StoredQueryList) resultMap.get(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        storedQueryListOfTrendCapturedQueries.addToQueryParameter(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        storedQueryListOfTrendCapturedQueries.addToQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),storedQueryListOfTrendCapturedQueries);
                     }
                     else {
-                        StoredQueryList storedQueryList = new StoredQueryList();
+                        StoredQueryList storedQueryListOfTrendCapturedQueries = new StoredQueryList();
                         StoredQuery storedQuery = new StoredQuery();
                         storedQuery.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         storedQuery.setTitle(resultSet.getString(StringConstants.COLUMN_TITLE_LABEL));
                         storedQuery.setQueryKey(resultSet.getString(StringConstants.COLUMN_QUERY_LABEL));
-                        storedQueryList.setStoredQuery(storedQuery);
-                        storedQueryList.setBearerToken(resultSet.getString(StringConstants.COLUMN_BEARER_TOKEN_LABEL));
-                        storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),storedQuery.getQueryId()));
-                        storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),storedQuery.getQueryId()));
-                        resultMap.put(String.valueOf(storedQuery.getQueryId()), storedQueryList);
+                        storedQueryListOfTrendCapturedQueries.setStoredQuery(storedQuery);
+                        storedQueryListOfTrendCapturedQueries.setBearerToken(resultSet.getString(StringConstants.COLUMN_BEARER_TOKEN_LABEL));
+                        storedQueryListOfTrendCapturedQueries.createQueryParameterList(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),storedQuery.getQueryId()));
+                        storedQueryListOfTrendCapturedQueries.createQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),storedQuery.getQueryId()));
+                        resultMap.put(String.valueOf(storedQuery.getQueryId()), storedQueryListOfTrendCapturedQueries);
                     }
                 }
                 return resultMap;
