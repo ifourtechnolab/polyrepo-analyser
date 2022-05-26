@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class QueryRepo {
-    private int id;
+    private int repoId;
     private String repoName;
     private int queryId;
 
