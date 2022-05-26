@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class QueryParameter {
 
-    private int id;
+    private int paramId;
     private String paramName;
     private String paramValue;
     private int queryId;
