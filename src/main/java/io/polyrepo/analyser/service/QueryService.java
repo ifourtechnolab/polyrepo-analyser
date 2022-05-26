@@ -131,4 +131,64 @@ public class QueryService {
                 return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Data not found");
         }
     }
+
+    /**
+     * This method will call the repository to check if current user has three queries marked for trend capture
+     * if not then it will call repository method to mark given queryId for trend capture
+     * @param userId Current user id
+     * @param queryId id of query to be marked for trend capture
+     * @return status of operation
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String,Object> setTrendCapture(int userId, int queryId) throws SQLException {
+        int count = queryRepository.getTrendCapturedQueryCount(userId);
+        if(count==3){
+            logger.info("Three Queries Already Marked For Trend Capture");
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Three Queries Already Marked For Trend Capture");
+        }
+        else {
+            logger.info("Setting Query For Trend Capture");
+            if(queryRepository.setTrendCapture(queryId)>0) {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Set For Trend Capture");
+            }
+            else {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Not Set For Trend Capture");
+            }
+        }
+    }
+
+    /**
+     * This method will call the repository method to return list of queries of current user that are marked for trend capture
+     * @param userId Current user id
+     * @return List of queries marked for trend capture of current user
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> getListOfTrendCapturedQueries(int userId) throws SQLException {
+        return queryRepository.getListOfTrendCapturedQueries(userId);
+    }
+
+    /**
+     *This method will call the repository method for un-marking the query from trend capture
+     * @param queryId id of query to be unmarked from trend capture
+     * @return status of operation
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> unsetTrendCapture(int queryId) throws SQLException{
+        int returnVal = queryRepository.unsetTrendCapture(queryId);
+        if(returnVal>0){
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query Removed from Trend Capture");
+        }else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query Not Removed from Trend Capture");
+        }
+    }
+
+    /**
+     * This method will call repository method to return list of trend results for database
+     * @param userId Current user id
+     * @return List of trend result
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> getTrendResults(int userId) throws SQLException{
+        return queryRepository.getTrendResults(userId);
+    }
 }
