@@ -35,7 +35,7 @@ public class QueryController {
     @GetMapping("/getQueries/{userId}")
     public ResponseEntity<Map<String, Object>> getStoredQueries(@PathVariable int userId){
         try{
-            logger.info("Getting list of stored queries");
+            logger.debug("Getting list of stored queries");
             return new ResponseEntity<>(queryService.getStoredQueries(userId), HttpStatus.OK);
         } catch ( SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Stored Queries"),HttpStatus.OK);
@@ -56,7 +56,7 @@ public class QueryController {
     @PostMapping("/saveQuery")
     public ResponseEntity<Map<String, Object>> saveQuery(@RequestParam String title,@RequestParam int userId,@RequestParam String queryKey, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam String orgName, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
         try {
-            logger.info("Save query of user");
+            logger.debug("Save query of user");
             return new ResponseEntity<>(queryService.saveQueries(new StoredQuery(title,queryKey,userId), repoNamesList, orgName, days, label), HttpStatus.OK);
         }catch (SQLIntegrityConstraintViolationException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
@@ -73,7 +73,7 @@ public class QueryController {
     @GetMapping("/deleteQuery/{queryId}")
     public ResponseEntity<Map<String,String>> deleteQuery(@PathVariable int queryId){
         try{
-            logger.info("Deleting stored query");
+            logger.debug("Deleting stored query");
             return new ResponseEntity<>(queryService.deleteQuery(queryId),HttpStatus.OK);
         }catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
@@ -113,7 +113,7 @@ public class QueryController {
     @PostMapping("{userId}/setTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> setTrendCapture(@PathVariable int userId, @PathVariable int queryId){
         try {
-            logger.info("Set Query For Trend Capture");
+            logger.debug("Set Query For Trend Capture");
             return new ResponseEntity<>(queryService.setTrendCapture(userId,queryId), HttpStatus.OK);
         } catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
@@ -128,7 +128,7 @@ public class QueryController {
     @PostMapping("/unsetTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> unsetTrendCapture(@PathVariable int queryId){
         try {
-            logger.info("Removing Query from Trend Capture");
+            logger.debug("Removing Query from Trend Capture");
             return new ResponseEntity<>(queryService.unsetTrendCapture(queryId),HttpStatus.OK);
         } catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
@@ -143,7 +143,7 @@ public class QueryController {
     @GetMapping("{userId}/getListOfTrendCapturedQueries")
     public ResponseEntity<Map<String,Object>> getListOfTrendCapturedQueries(@PathVariable int userId) {
         try{
-            logger.info("Getting list of trend captured queries");
+            logger.debug("Getting list of trend captured queries");
             return new ResponseEntity<>(queryService.getListOfTrendCapturedQueries(userId),HttpStatus.OK);
         } catch ( SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Trend Captured Queries"),HttpStatus.OK);
@@ -158,7 +158,7 @@ public class QueryController {
     @GetMapping("{userId}/getTrendResults")
     public ResponseEntity<Map<String,Object>> getTrendResults(@PathVariable int userId) {
         try{
-            logger.info("Getting Trend Results");
+            logger.debug("Getting Trend Results");
             return new ResponseEntity<>(queryService.getTrendResults(userId),HttpStatus.OK);
         } catch ( SQLException e) {
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Trend Result Found"),HttpStatus.OK);
