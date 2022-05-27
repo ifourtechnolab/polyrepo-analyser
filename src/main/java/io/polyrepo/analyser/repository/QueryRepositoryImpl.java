@@ -270,7 +270,7 @@ public class QueryRepositoryImpl implements QueryRepository {
     public void saveTrendResult(TrendCapture trendCapture) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(saveTrendResultQuery, Statement.RETURN_GENERATED_KEYS)) {
-                preparedStatement.setDate(1,trendCapture.getDate());
+                preparedStatement.setDate(1,trendCapture.getDateOfResult());
                 preparedStatement.setInt(2,trendCapture.getResult());
                 preparedStatement.setInt(3,trendCapture.getQueryId());
                 preparedStatement.executeUpdate();
@@ -297,7 +297,7 @@ public class QueryRepositoryImpl implements QueryRepository {
                         TrendCapture trendCapture = new TrendCapture();
                         trendCapture.setTrendId(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
                         trendCapture.setResult(resultSet.getInt(StringConstants.COLUMN_RESULT_LABEL));
-                        trendCapture.setDate(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
+                        trendCapture.setDateOfResult(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         trendCapturesOfQuery.add(trendCapture);
                         resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),trendCapturesOfQuery);
@@ -307,7 +307,7 @@ public class QueryRepositoryImpl implements QueryRepository {
                         TrendCapture trendCapture = new TrendCapture();
                         trendCapture.setTrendId(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
                         trendCapture.setResult(resultSet.getInt(StringConstants.COLUMN_RESULT_LABEL));
-                        trendCapture.setDate(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
+                        trendCapture.setDateOfResult(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         List<TrendCapture> trendCapturesOfQuery = new ArrayList<>();
                         trendCapturesOfQuery.add(trendCapture);

@@ -9,12 +9,12 @@ import java.sql.Date;
 @NoArgsConstructor
 public class TrendCapture {
     private int trendId;
-    private Date date;
+    private Date dateOfResult;
     private int result;
     private int queryId;
 
-    public TrendCapture(Date date, int result, int queryId) {
-        this.date = date;
+    public TrendCapture(Date dateOfCapture, int result, int queryId) {
+        this.dateOfResult = dateOfCapture;
         this.result = result;
         this.queryId = queryId;
     }
