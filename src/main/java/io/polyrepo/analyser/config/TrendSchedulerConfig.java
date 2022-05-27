@@ -19,10 +19,10 @@ import java.util.*;
 public class TrendSchedulerConfig {
 
     @Autowired
-    QueryRepository queryRepository;
+    private QueryRepository queryRepository;
 
     @Autowired
-    QueryService queryService;
+    private QueryService queryService;
 
     private final Logger logger = LoggerFactory.getLogger(TrendSchedulerConfig.class);
 
@@ -34,14 +34,14 @@ public class TrendSchedulerConfig {
                     listOfAllTrendCapturedQueries.entrySet()) {
                 int result = getResult((StoredQueryList) entry.getValue());
                 TrendCapture trendCapture = new TrendCapture();
-                trendCapture.setDate(Date.valueOf(LocalDate.now()));
+                trendCapture.setDateOfResult(Date.valueOf(LocalDate.now()));
                 trendCapture.setQueryId(Integer.parseInt(entry.getKey()));
                 trendCapture.setResult(result);
                 queryRepository.saveTrendResult(trendCapture);
             }
         }
         catch (SQLException e){
-            logger.info("SQL EXCEPTION OCCURRED");
+            logger.debug(e.getMessage());
         }
     }
 
