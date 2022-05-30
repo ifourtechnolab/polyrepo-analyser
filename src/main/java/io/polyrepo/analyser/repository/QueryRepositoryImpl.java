@@ -48,6 +48,12 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${getTrendResultsQuery}")
     private String getTrendResultsQuery;
 
+    @Value("${getListOfTrendCapturedByQueryIdQuery}")
+    private String getListOfTrendCapturedByQueryIdQuery;
+
+    @Value("${deleteTrendByTrendIdQuery}")
+    private String deleteTrendByTrendIdQuery;
+
 
     /**
      * This method will fetch all the stored queries with parameters and repository list of a user using join query
@@ -315,6 +321,31 @@ public class QueryRepositoryImpl implements QueryRepository {
                     }
                 }
                 return new HashMap<>(resultMap);
+            }
+        }
+    }
+
+    @Override
+    public List<Integer> getListOfTrendCapturedByQueryId(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(getListOfTrendCapturedByQueryIdQuery)) {
+                preparedStatement.setInt(1, queryId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<Integer> list = new ArrayList<>();
+                while (resultSet.next()) {
+                    list.add(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
+                }
+                return list;
+            }
+        }
+    }
+
+    @Override
+    public void deleteTrendByTrendId(Integer trendId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteTrendByTrendIdQuery)) {
+            preparedStatement.setInt(1,trendId);
+            preparedStatement.executeUpdate();
             }
         }
     }
