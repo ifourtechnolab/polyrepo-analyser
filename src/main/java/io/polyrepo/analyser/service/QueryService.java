@@ -57,15 +57,17 @@ public class QueryService {
      * @param repoNamesList List of Repositories selected by user
      * @param orgName GitHub Organization login name
      * @param days Number of days for filter
+     * @param type Type of stored query analysis (pr/issue)
      * @return map with status of database operation
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days, String label) throws SQLException{
+    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days, String label, String type) throws SQLException{
         logger.info("Saving query in database");
         int storedQueryId = queryRepository.saveStoredQuery(storedQuery);
         if(storedQueryId>0){
             logger.info("Saving parameter in database");
             parameterRepository.saveParameter(new QueryParameter(ParameterName.ORGNAME.getParamName(), orgName,storedQueryId));
+            parameterRepository.saveParameter(new QueryParameter(ParameterName.TYPE.getParamName(), type,storedQueryId));
             if(days!=null){
                 parameterRepository.saveParameter(new QueryParameter(ParameterName.DAYS.getParamName(), days.toString(),storedQueryId));
             }
