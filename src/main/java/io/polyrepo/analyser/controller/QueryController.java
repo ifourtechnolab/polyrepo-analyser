@@ -61,6 +61,27 @@ public class QueryController {
         }catch (SQLIntegrityConstraintViolationException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
         } catch (SQLException e) {
+            logger.debug(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
+        }
+    }
+
+    /** Endpoint to store the update query in database
+     *
+     * @param queryId id of query to be updated
+     * @param title Stored query title
+     * @param repoNamesList List of Repositories selected by user
+     * @param days Number of days for filter
+     * @param label Label for filter
+     * @return ResponseEntity with database operation status
+     */
+    @PostMapping("/updateQuery/{queryId}")
+    public ResponseEntity<Map<String, Object>> updateQuery(@PathVariable int queryId,@RequestParam String title, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
+        try {
+            logger.debug("Update query of user");
+            return new ResponseEntity<>(queryService.updateQueries(queryId, title, days, label, repoNamesList), HttpStatus.OK);
+        } catch (SQLException e) {
+            logger.debug(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
         }
     }
