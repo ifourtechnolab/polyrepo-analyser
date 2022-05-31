@@ -55,35 +55,38 @@ public class QueryService {
 
     /**
      * This method will call repository to save query, parameter and repolist in database
-     * @param storedQuery Save query details
+     *
+     * @param storedQuery   Save query details
      * @param repoNamesList List of Repositories selected by user
-     * @param orgName GitHub Organization login name
-     * @param days Number of days for filter
-     * @param type Type of stored query analysis (pr/issue)
+     * @param orgName       GitHub Organization login name
+     * @param days          Number of days for filter
+     * @param type          Type of stored query analysis (pr/issue)
      * @return map with status of database operation
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String,Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days, String label, String type) throws SQLException{
+    public Map<String, Object> saveQueries(StoredQuery storedQuery, RepoNamesList repoNamesList, String orgName, Integer days, String label, String type) throws SQLException {
         logger.info("Saving query in database");
         int storedQueryId = queryRepository.saveStoredQuery(storedQuery);
-        if(storedQueryId>0){
+        if (storedQueryId > 0) {
             logger.info("Saving parameter in database");
-            parameterRepository.saveParameter(new QueryParameter(ParameterName.ORGNAME.getParamName(), orgName,storedQueryId));
-            parameterRepository.saveParameter(new QueryParameter(ParameterName.TYPE.getParamName(), type,storedQueryId));
-            if(days!=null){
-                parameterRepository.saveParameter(new QueryParameter(ParameterName.DAYS.getParamName(), days.toString(),storedQueryId));
+            parameterRepository.saveParameter(new QueryParameter(ParameterName.ORGNAME.getParamName(), orgName, storedQueryId));
+            parameterRepository.saveParameter(new QueryParameter(ParameterName.TYPE.getParamName(), type, storedQueryId));
+            if (days != null) {
+                parameterRepository.saveParameter(new QueryParameter(ParameterName.DAYS.getParamName(), days.toString(), storedQueryId));
             }
-            if(label!=null){
-                parameterRepository.saveParameter(new QueryParameter(ParameterName.LABEL.getParamName(), label,storedQueryId));
+            if (label != null) {
+                parameterRepository.saveParameter(new QueryParameter(ParameterName.LABEL.getParamName(), label, storedQueryId));
             }
-            if(repoNamesList!=null){
+            if (repoNamesList != null) {
                 logger.info("Saving Repolist in database");
-                storedRepoRepository.saveRepoNameList(repoNamesList,storedQueryId);
+                storedRepoRepository.saveRepoNameList(repoNamesList, storedQueryId);
             }
-            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query saved successfully");
-        }
-        else{
-            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query not saved");
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put(StringConstants.JSON_MESSAGE_KEY_STRING, "Query saved successfully");
+            returnMap.put("id", storedQueryId);
+            return returnMap;
+        } else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query not saved");
         }
     }
 
