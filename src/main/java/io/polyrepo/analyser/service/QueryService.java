@@ -1,27 +1,31 @@
 package io.polyrepo.analyser.service;
 
 import feign.FeignException;
+import io.polyrepo.analyser.client.GraphQLClient;
 import io.polyrepo.analyser.constant.StringConstants;
-import io.polyrepo.analyser.model.QueryParameter;
-import io.polyrepo.analyser.model.RepoNamesList;
-import io.polyrepo.analyser.model.StoredQuery;
+import io.polyrepo.analyser.model.*;
 import io.polyrepo.analyser.repository.ParameterRepository;
 import io.polyrepo.analyser.repository.QueryRepository;
 import io.polyrepo.analyser.repository.StoredRepoRepository;
 import io.polyrepo.analyser.util.ParameterName;
+import io.polyrepo.analyser.util.QueryUtil;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class QueryService {
+
+    @Autowired
+    private GraphQLClient client;
 
     @Autowired
     QueryRepository queryRepository;
@@ -41,10 +45,24 @@ public class QueryService {
     @Autowired
     private LabelService labelService;
 
+    @Value("${getUnmergedPinQuery}")
+    private String getUnmergedPinQuery;
+
+    @Value("${getPinnedQuery}")
+    private String getPinnedQuery;
+
+    @Value("${getNoActivityPinQuery}")
+    private String getNoActivityPinQuery;
+
+    @Value("${getPriority1IssuesOpenedPinQuery}")
+    private String getPriority1IssuesOpenedPinQuery;
+
+
     private final Logger logger = LoggerFactory.getLogger(QueryService.class);
 
     /**
      * This method get all the details of stored queries of current user
+     *
      * @param userId Current user id
      * @return Map with the details of stored queries
      * @throws SQLException if error occurs in database operation
@@ -198,6 +216,7 @@ public class QueryService {
 
     /**
      * This method will call the repository method to return list of queries of current user that are marked for trend capture
+     *
      * @param userId Current user id
      * @return List of queries marked for trend capture of current user
      * @throws SQLException if error occurs in database operation
@@ -228,7 +247,102 @@ public class QueryService {
      * @return List of trend result
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String, Object> getTrendResults(int userId) throws SQLException{
+    public Map<String, Object> getTrendResults(int userId) throws SQLException {
         return queryRepository.getTrendResults(userId);
+    }
+
+    /**This method will call the repository to check if current user has four queries marked for pin
+     * if not then it will call repository method to mark given queryId for pin
+     *
+     * @param userId Current user id
+     * @param queryId id of query to be marked for pin
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> setPinned(int userId, int queryId) throws SQLException {
+        int count = queryRepository.getPinnedQueryCount(userId);
+        if (count == 4) {
+            logger.info("Four Queries Already Marked For Pinned");
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Four Queries Already Marked For Pinned");
+        } else {
+            logger.info("Setting Query For Trend Capture");
+            if (queryRepository.setPinned(queryId) > 0) {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Set For Pinned");
+            } else {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Not Set For Pinned");
+            }
+        }
+    }
+
+    /**This method will call the repository method for un-marking the query from pin
+     *
+     * @param queryId id of query to be unmarked from pin
+     * @return  status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> unsetPinned(int queryId) throws SQLException {
+        int returnVal = queryRepository.unsetPinned(queryId);
+        if (returnVal > 0) {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Removed from Pinned");
+        } else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Not Removed from Pinned");
+        }
+    }
+
+    /** This method will call repository to get list of queries which are marked for pin
+     * with the details of queries this method will call feign client to get the data of pin
+     *
+     * @param userId Current user id
+     * @return list of pin query result with query details
+     * @throws SQLException if error occurs in database operation
+     * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
+     */
+    public Map<String, Object> getPinnedResults(int userId) throws SQLException, FeignException {
+        Map<String, Object> listOfAllPinnedQueries = queryRepository.getListOfAllPinnedQueries(userId);
+        Map<String, Object> pinnedData = new HashMap<>();
+        if (listOfAllPinnedQueries.size() > 0) {
+            for (Map.Entry<String, Object> entry : listOfAllPinnedQueries.entrySet()) {
+                String orgName = ((StoredQueryList) entry.getValue()).getQueryParameterList().stream()
+                        .filter(x -> x.getParamName().equals(ParameterName.ORGNAME.getParamName()))
+                        .map(QueryParameter::getParamValue).findFirst().orElse("");
+                String days = ((StoredQueryList) entry.getValue()).getQueryParameterList().stream()
+                        .filter(x -> x.getParamName().equals(ParameterName.DAYS.getParamName()))
+                        .map(QueryParameter::getParamValue).findFirst().orElse("");
+
+                switch (((StoredQueryList) entry.getValue()).getStoredQuery().getQueryKey()) {
+                    case "getPullRequestNotUpdatedByDaysQuery":
+                        StringBuilder queryNoUpdate = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getNoActivityPinQuery, orgName,days);
+                        String graphqlQueryNoUpdate = String.format(getPinnedQuery, queryNoUpdate);
+                        ResponseEntity<String> responseNoUpdate;
+                        responseNoUpdate = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryNoUpdate);
+                        JSONObject resultNoUpdate = new JSONObject(Objects.requireNonNull(responseNoUpdate.getBody()));
+                        pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), resultNoUpdate.toMap());
+                        break;
+                    case "getUnMergedPullRequestByDayQuery":
+                        StringBuilder queryUnMerged = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getUnmergedPinQuery, orgName,days);
+                        String graphqlQueryUnMerged = String.format(getPinnedQuery, queryUnMerged);
+                        ResponseEntity<String> responseUnMerged;
+                        responseUnMerged = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryUnMerged);
+                        JSONObject resultUnMerged = new JSONObject(Objects.requireNonNull(responseUnMerged.getBody()));
+                        pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), resultUnMerged.toMap());
+                        break;
+                    case "getPriority1IssuesOpenedBeforeXDaysQuery":
+                        StringBuilder queryPriority1Issues = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getPriority1IssuesOpenedPinQuery, orgName,days);
+                        String graphqlQueryPriority1Issues = String.format(getPinnedQuery, queryPriority1Issues);
+                        ResponseEntity<String> responsePriority1Issues;
+                        responsePriority1Issues = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryPriority1Issues);
+                        JSONObject resultPriority1Issues = new JSONObject(Objects.requireNonNull(responsePriority1Issues.getBody()));
+                        pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), resultPriority1Issues.toMap());
+                        break;
+                    default:
+                        pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), "Data not found");
+                        break;
+                }
+            }
+            listOfAllPinnedQueries.put("pin", pinnedData);
+        } else {
+            listOfAllPinnedQueries.put(StringConstants.JSON_MESSAGE_KEY_STRING,"No Pinned Analysis");
+        }
+        return listOfAllPinnedQueries;
     }
 }
