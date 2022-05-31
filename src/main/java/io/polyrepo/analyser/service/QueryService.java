@@ -90,6 +90,39 @@ public class QueryService {
         }
     }
 
+    /** This method will call repository to update query details, parameters and repoName list
+     *
+     * @param queryId id of query to be updated
+     * @param title title of stored query
+     * @param days days for filter
+     * @param label label for filter
+     * @param repoNamesList repository name list of stored query
+     * @return map with status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    public Map<String, Object> updateQueries(int queryId, String title, Integer days, String label, RepoNamesList repoNamesList) throws SQLException {
+        int queryUpdateValue = 0;
+        if (days != null) {
+            logger.info("Updating stored query with days");
+            queryUpdateValue = queryRepository.updateStoredQueryWithParameter(queryId, title, String.valueOf(days), ParameterName.DAYS.getParamName());
+        }
+        if (label != null) {
+            logger.info("Updating stored query with label");
+            queryUpdateValue = queryRepository.updateStoredQueryWithParameter(queryId, title, label, ParameterName.LABEL.getParamName());
+        }
+        if (queryUpdateValue > 0 && repoNamesList != null) {
+            logger.info("Updating stored repository name list");
+            int repoUpdateVal = storedRepoRepository.updateRepoNameList(queryId, repoNamesList);
+            if (repoUpdateVal > 0) {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Saved Analysis Updated Successfully");
+            } else {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Repository List Not Updated");
+            }
+        } else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Saved Analysis Not Updated");
+        }
+    }
+
     /**
      * This method will delete the stored query by id
      *
