@@ -146,7 +146,7 @@ public class QueryController {
      * @param queryId id of query to be unmarked from trend capture
      * @return Response entity with the database operation status
      */
-    @PostMapping("/unsetTrendCapture/{queryId}")
+    @GetMapping("/unsetTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> unsetTrendCapture(@PathVariable int queryId){
         try {
             logger.debug("Removing Query from Trend Capture");
