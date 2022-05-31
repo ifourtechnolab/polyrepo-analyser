@@ -131,7 +131,7 @@ public class QueryController {
      * @param queryId id of query to be marked for trend capture
      * @return Response entity with the database operation status
      */
-    @PostMapping("{userId}/setTrendCapture/{queryId}")
+    @GetMapping("{userId}/setTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> setTrendCapture(@PathVariable int userId, @PathVariable int queryId){
         try {
             logger.debug("Set Query For Trend Capture");
