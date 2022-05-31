@@ -108,56 +108,56 @@ public class QueryService {
 
     /**
      * This method will call the service of analysis according to the query key
-     * @param token GitHub personal access token
-     * @param queryId Query key to identify the analysis
-     * @param queryKey Query key to identify the analysis
-     * @param orgUserName GitHub Organization login name
-     * @param days Number of days for filter
-     * @param label  Label for filter
+     *
+     * @param token         GitHub personal access token
+     * @param queryId       Query key to identify the analysis
+     * @param queryKey      Query key to identify the analysis
+     * @param orgUserName   GitHub Organization login name
+     * @param days          Number of days for filter
+     * @param label         Label for filter
      * @param repoNamesList List of Repositories selected by user
      * @return result of stored query from the service
      * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
-     * @throws JSONException if JSON parsing is invalid
+     * @throws JSONException  if JSON parsing is invalid
      */
-    public Map<String,Object> getQueryResult(String token, int queryId, String queryKey, String orgUserName, Integer days, String label, RepoNamesList repoNamesList) throws FeignException, JSONException {
-        switch (queryKey){
+    public Map<String, Object> getQueryResult(String token, int queryId, String queryKey, String orgUserName, Integer days, String label, RepoNamesList repoNamesList) throws FeignException, JSONException {
+        switch (queryKey) {
             case "getPullRequestNotUpdatedByDaysQuery":
-                return pullRequestService.getPRNotUpdatedByDays(token,orgUserName,repoNamesList,days);
+                return pullRequestService.getPRNotUpdatedByDays(token, orgUserName, repoNamesList, days);
             case "getUnMergedPullRequestByDayQuery":
-                return pullRequestService.getUnMergedPullRequestByDays(token,orgUserName,repoNamesList,days);
+                return pullRequestService.getUnMergedPullRequestByDays(token, orgUserName, repoNamesList, days);
             case "getPriority1IssuesOpenedBeforeXDaysQuery":
-                return issueService.getPriority1IssuesOpenedBeforeXDays(orgUserName,token,repoNamesList,days);
+                return issueService.getPriority1IssuesOpenedBeforeXDays(orgUserName, token, repoNamesList, days);
             case "getOpenIssueNamesByLabel":
-                return labelService.getOpenIssueNamesByLabel(orgUserName,label,token,repoNamesList);
+                return labelService.getOpenIssueNamesByLabel(orgUserName, label, token, repoNamesList);
             case "getClosedP1IssuesTimeQuery":
-                return new HashMap<>(issueService.getAverageResolvingTimeOfP1Issues(orgUserName,token));
+                return new HashMap<>(issueService.getAverageResolvingTimeOfP1Issues(orgUserName, token));
             case "getClosedP2IssuesTimeQuery":
-                return new HashMap<>(issueService.getAverageResolvingTimeOfP2Issues(orgUserName,token));
+                return new HashMap<>(issueService.getAverageResolvingTimeOfP2Issues(orgUserName, token));
             default:
-                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Data not found");
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Data not found");
         }
     }
 
     /**
      * This method will call the repository to check if current user has three queries marked for trend capture
      * if not then it will call repository method to mark given queryId for trend capture
-     * @param userId Current user id
+     *
+     * @param userId  Current user id
      * @param queryId id of query to be marked for trend capture
      * @return status of operation
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String,Object> setTrendCapture(int userId, int queryId) throws SQLException {
+    public Map<String, Object> setTrendCapture(int userId, int queryId) throws SQLException {
         int count = queryRepository.getTrendCapturedQueryCount(userId);
-        if(count==3){
+        if (count == 3) {
             logger.info("Three Queries Already Marked For Trend Capture");
-            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Three Queries Already Marked For Trend Capture");
-        }
-        else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Three Queries Already Marked For Trend Capture");
+        } else {
             logger.info("Setting Query For Trend Capture");
-            if(queryRepository.setTrendCapture(queryId)>0) {
+            if (queryRepository.setTrendCapture(queryId) > 0) {
                 return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Set For Trend Capture");
-            }
-            else {
+            } else {
                 return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Not Set For Trend Capture");
             }
         }
@@ -174,17 +174,18 @@ public class QueryService {
     }
 
     /**
-     *This method will call the repository method for un-marking the query from trend capture
+     * This method will call the repository method for un-marking the query from trend capture
+     *
      * @param queryId id of query to be unmarked from trend capture
      * @return status of operation
      * @throws SQLException if error occurs in database operation
      */
-    public Map<String, Object> unsetTrendCapture(int queryId) throws SQLException{
+    public Map<String, Object> unsetTrendCapture(int queryId) throws SQLException {
         int returnVal = queryRepository.unsetTrendCapture(queryId);
-        if(returnVal>0){
-            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query Removed from Trend Capture");
-        }else {
-            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query Not Removed from Trend Capture");
+        if (returnVal > 0) {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Removed from Trend Capture");
+        } else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Query Not Removed from Trend Capture");
         }
     }
 
