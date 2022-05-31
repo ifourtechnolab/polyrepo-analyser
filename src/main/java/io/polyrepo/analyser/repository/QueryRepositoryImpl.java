@@ -298,15 +298,15 @@ public class QueryRepositoryImpl implements QueryRepository {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 Map<String, List<TrendCapture>> resultMap = new HashMap<>();
                 while (resultSet.next()) {
-                    if(resultMap.containsKey(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)))) {
-                        List<TrendCapture> trendCapturesOfQuery = resultMap.get(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                    if(resultMap.containsKey("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL))) {
+                        List<TrendCapture> trendCapturesOfQuery = resultMap.get("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         TrendCapture trendCapture = new TrendCapture();
                         trendCapture.setTrendId(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
                         trendCapture.setResult(resultSet.getInt(StringConstants.COLUMN_RESULT_LABEL));
                         trendCapture.setDateOfResult(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         trendCapturesOfQuery.add(trendCapture);
-                        resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),trendCapturesOfQuery);
+                        resultMap.replace("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL),trendCapturesOfQuery);
 
                     }
                     else {
@@ -317,7 +317,7 @@ public class QueryRepositoryImpl implements QueryRepository {
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         List<TrendCapture> trendCapturesOfQuery = new ArrayList<>();
                         trendCapturesOfQuery.add(trendCapture);
-                        resultMap.put(String.valueOf(trendCapture.getQueryId()), trendCapturesOfQuery);
+                        resultMap.put("QID" + trendCapture.getQueryId(), trendCapturesOfQuery);
                     }
                 }
                 return new HashMap<>(resultMap);
