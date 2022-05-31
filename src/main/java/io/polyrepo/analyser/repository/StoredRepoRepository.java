@@ -8,4 +8,6 @@ import java.sql.SQLException;
 @Repository
 public interface StoredRepoRepository {
     void saveRepoNameList(RepoNamesList repoNamesList,int queryId) throws SQLException;
+
+    int updateRepoNameList(int queryId, RepoNamesList repoNamesList) throws SQLException;
 }
