@@ -69,6 +69,9 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${deleteTrendByTrendIdQuery}")
     private String deleteTrendByTrendIdQuery;
 
+    @Value("${updateStoredQueryTitleQuery}")
+    private String updateStoredQueryTitleQuery;
+
 
     /**
      * This method will fetch all the stored queries with parameters and repository list of a user using join query
@@ -366,7 +369,7 @@ public class QueryRepositoryImpl implements QueryRepository {
             }
         }
     }
-  
+
     /**
      * This method will mark the query for pin
      * @param queryId id of query to be marked for pin
@@ -438,6 +441,24 @@ public class QueryRepositoryImpl implements QueryRepository {
                 preparedStatement.setString(2,paramValue);
                 preparedStatement.setInt(3,queryId);
                 preparedStatement.setString(4,paramName);
+                return preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    /** This method will update stored query title
+     *
+     * @param queryId id of the query to be updated
+     * @param title title of stored query
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int updateStoredQueryLabel(int queryId, String title) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(updateStoredQueryTitleQuery)){
+                preparedStatement.setString(1,title);
+                preparedStatement.setInt(2,queryId);
                 return preparedStatement.executeUpdate();
             }
         }
