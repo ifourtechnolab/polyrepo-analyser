@@ -5,6 +5,7 @@ import io.polyrepo.analyser.model.TrendCapture;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 
@@ -30,4 +31,8 @@ public interface QueryRepository {
     Map<String, Object> getListOfAllTrendCapturedQueries() throws SQLException;
 
     void saveTrendResult(TrendCapture trendCapture) throws SQLException;
+
+    List<Integer> getListOfTrendCapturedByQueryId(int queryId) throws SQLException;
+
+    void deleteTrendByTrendId(Integer trendId) throws SQLException;
 }

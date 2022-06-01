@@ -48,6 +48,12 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${getTrendResultsQuery}")
     private String getTrendResultsQuery;
 
+    @Value("${getListOfTrendCapturedByQueryIdQuery}")
+    private String getListOfTrendCapturedByQueryIdQuery;
+
+    @Value("${deleteTrendByTrendIdQuery}")
+    private String deleteTrendByTrendIdQuery;
+
 
     /**
      * This method will fetch all the stored queries with parameters and repository list of a user using join query
@@ -292,15 +298,15 @@ public class QueryRepositoryImpl implements QueryRepository {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 Map<String, List<TrendCapture>> resultMap = new HashMap<>();
                 while (resultSet.next()) {
-                    if(resultMap.containsKey(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)))) {
-                        List<TrendCapture> trendCapturesOfQuery = resultMap.get(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                    if(resultMap.containsKey("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL))) {
+                        List<TrendCapture> trendCapturesOfQuery = resultMap.get("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         TrendCapture trendCapture = new TrendCapture();
                         trendCapture.setTrendId(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
                         trendCapture.setResult(resultSet.getInt(StringConstants.COLUMN_RESULT_LABEL));
                         trendCapture.setDateOfResult(resultSet.getDate(StringConstants.COLUMN_DATE_LABEL));
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         trendCapturesOfQuery.add(trendCapture);
-                        resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),trendCapturesOfQuery);
+                        resultMap.replace("QID" + resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL),trendCapturesOfQuery);
 
                     }
                     else {
@@ -311,10 +317,35 @@ public class QueryRepositoryImpl implements QueryRepository {
                         trendCapture.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         List<TrendCapture> trendCapturesOfQuery = new ArrayList<>();
                         trendCapturesOfQuery.add(trendCapture);
-                        resultMap.put(String.valueOf(trendCapture.getQueryId()), trendCapturesOfQuery);
+                        resultMap.put("QID" + trendCapture.getQueryId(), trendCapturesOfQuery);
                     }
                 }
                 return new HashMap<>(resultMap);
+            }
+        }
+    }
+
+    @Override
+    public List<Integer> getListOfTrendCapturedByQueryId(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(getListOfTrendCapturedByQueryIdQuery)) {
+                preparedStatement.setInt(1, queryId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                List<Integer> list = new ArrayList<>();
+                while (resultSet.next()) {
+                    list.add(resultSet.getInt(StringConstants.COLUMN_TREND_ID_LABEL));
+                }
+                return list;
+            }
+        }
+    }
+
+    @Override
+    public void deleteTrendByTrendId(Integer trendId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteTrendByTrendIdQuery)) {
+            preparedStatement.setInt(1,trendId);
+            preparedStatement.executeUpdate();
             }
         }
     }
