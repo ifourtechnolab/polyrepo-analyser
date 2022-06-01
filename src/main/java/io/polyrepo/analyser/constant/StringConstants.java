@@ -29,4 +29,11 @@ public class StringConstants {
     public static final String COLUMN_USER_ID_LABEL="user_id";
     public static final String COLUMN_USER_NAME_LABEL="user_name";
 
+    public static final String GRAPHQL_IDLE_PR_QUERY_KEY="getPullRequestNotUpdatedByDaysQuery";
+    public static final String GRAPHQL_UNMERGED_PR_QUERY_KEY="getUnMergedPullRequestByDayQuery";
+    public static final String GRAPHQL_PRIORITY_1_OPEN_ISSUE_QUERY_KEY="getPriority1IssuesOpenedBeforeXDaysQuery";
+    public static final String GRAPHQL_OPEN_ISSUES_BY_LABEL_QUERY_KEY="getOpenIssueNamesByLabel";
+    public static final String GRAPHQL_P1_ISSUE_TIME_QUERY_KEY="getClosedP1IssuesTimeQuery";
+    public static final String GRAPHQL_P2_ISSUE_TIME_QUERY_KEY="getClosedP2IssuesTimeQuery";
+
 }
