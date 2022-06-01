@@ -59,7 +59,7 @@ public class IssueService {
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY).getJSONObject(StringConstants.JSON_SEARCH_KEY);
-        result.put(StringConstants.JSON_QUERYKEY_KEY,"getPriority1IssuesOpenedBeforeXDaysQuery");
+        result.put(StringConstants.JSON_QUERYKEY_KEY,StringConstants.GRAPHQL_PRIORITY_1_OPEN_ISSUE_QUERY_KEY);
         return result.toMap();
     }
 
@@ -78,7 +78,7 @@ public class IssueService {
 
         ResponseEntity<String> response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         Map<String,String> result = new HashMap<>(AverageUtil.getAverageTime(response));
-        result.put(StringConstants.JSON_QUERYKEY_KEY,"getClosedP1IssuesTimeQuery");
+        result.put(StringConstants.JSON_QUERYKEY_KEY,StringConstants.GRAPHQL_P1_ISSUE_TIME_QUERY_KEY);
         return result;
     }
 
@@ -97,7 +97,7 @@ public class IssueService {
 
         ResponseEntity<String> response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         Map<String,String> result = new HashMap<>(AverageUtil.getAverageTime(response));
-        result.put(StringConstants.JSON_QUERYKEY_KEY,"getClosedP2IssuesTimeQuery");
+        result.put(StringConstants.JSON_QUERYKEY_KEY,StringConstants.GRAPHQL_P2_ISSUE_TIME_QUERY_KEY);
         return result;
     }
 }

@@ -57,7 +57,7 @@ public class PullRequestService {
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
-        result.put(StringConstants.JSON_QUERYKEY_KEY,"getPullRequestNotUpdatedByDaysQuery");
+        result.put(StringConstants.JSON_QUERYKEY_KEY,StringConstants.GRAPHQL_IDLE_PR_QUERY_KEY);
         return result.toMap();
     }
 
@@ -84,7 +84,7 @@ public class PullRequestService {
 
         response = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + token, query);
         JSONObject result = new JSONObject(Objects.requireNonNull(response.getBody())).getJSONObject(StringConstants.JSON_DATA_KEY);
-        result.put(StringConstants.JSON_QUERYKEY_KEY,"getUnMergedPullRequestByDayQuery");
+        result.put(StringConstants.JSON_QUERYKEY_KEY,StringConstants.GRAPHQL_UNMERGED_PR_QUERY_KEY);
         return result.toMap();
 
     }
