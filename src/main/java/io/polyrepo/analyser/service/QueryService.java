@@ -110,18 +110,29 @@ public class QueryService {
         }
     }
 
-    /** This method will call repository to update query details, parameters and repoName list
+    /**
+     * This method will call repository to update query details, parameters and repoName list
      *
-     * @param queryId id of query to be updated
-     * @param title title of stored query
-     * @param days days for filter
-     * @param label label for filter
+     * @param queryId       id of query to be updated
+     * @param title         title of stored query
+     * @param days          days for filter
+     * @param label         label for filter
      * @param repoNamesList repository name list of stored query
      * @return map with status of database operation
      * @throws SQLException if error occurs in database operation
      */
     public Map<String, Object> updateQueries(int queryId, String title, Integer days, String label, RepoNamesList repoNamesList) throws SQLException {
         int queryUpdateValue = 0;
+
+        if (label == null && days == null) {
+            logger.info("Updating stored query without days and label");
+            queryUpdateValue = queryRepository.updateStoredQueryLabel(queryId, title);
+            if(queryUpdateValue>0) {
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Saved Analysis Updated Successfully");
+            }else{
+                return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Saved Analysis Not Updated");
+            }
+        }
         if (days != null) {
             logger.info("Updating stored query with days");
             queryUpdateValue = queryRepository.updateStoredQueryWithParameter(queryId, title, String.valueOf(days), ParameterName.DAYS.getParamName());
@@ -130,6 +141,7 @@ public class QueryService {
             logger.info("Updating stored query with label");
             queryUpdateValue = queryRepository.updateStoredQueryWithParameter(queryId, title, label, ParameterName.LABEL.getParamName());
         }
+
         if (queryUpdateValue > 0 && repoNamesList != null) {
             logger.info("Updating stored repository name list");
             int repoUpdateVal = storedRepoRepository.updateRepoNameList(queryId, repoNamesList);
@@ -141,6 +153,7 @@ public class QueryService {
         } else {
             return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, "Saved Analysis Not Updated");
         }
+
     }
 
     /**
@@ -245,6 +258,7 @@ public class QueryService {
 
     /**
      * This method will call repository method to return list of trend results for database
+     *
      * @param userId Current user id
      * @return List of trend result
      * @throws SQLException if error occurs in database operation
@@ -253,11 +267,11 @@ public class QueryService {
         return queryRepository.getTrendResults(userId);
     }
 
-   /**
+    /**
      * This method will get list of all queries marked for trend capture, call getResultForTrend method,
      * check if there are 10 entries saved in database (if yes, delete the oldest entry) and save result in database
      */
-    public void scheduledTrendCapture(){
+    public void scheduledTrendCapture() {
         try {
             logger.debug("Getting List of All Queries Marked for Trend Capture");
             Map<String, Object> listOfAllTrendCapturedQueries = queryRepository.getListOfAllTrendCapturedQueries();
@@ -269,28 +283,28 @@ public class QueryService {
                 trendCapture.setQueryId(Integer.parseInt(entry.getKey()));
                 trendCapture.setResult(result);
                 List<Integer> listOfTrendCapturedByQueryId = queryRepository.getListOfTrendCapturedByQueryId(Integer.parseInt(entry.getKey()));
-                if(listOfTrendCapturedByQueryId.size() == 10) {
+                if (listOfTrendCapturedByQueryId.size() == 10) {
                     queryRepository.deleteTrendByTrendId(listOfTrendCapturedByQueryId.get(0));
 
                 }
                 queryRepository.saveTrendResult(trendCapture);
 
             }
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             logger.info(e.getMessage());
         }
     }
 
     /**
      * This method will get the result of query and return it to scheduledTrendCapture method
+     *
      * @param value StoredQueryList object containing queryKey, param list, repoName list
      * @return totalCount (issues or pull requests)
      */
     private int getResultForTrend(StoredQueryList value) {
-        List<RepoName> repoNames= new ArrayList<>();
+        List<RepoName> repoNames = new ArrayList<>();
         RepoName repoName = new RepoName();
-        for (QueryRepo q:
+        for (QueryRepo q :
                 value.getQueryRepoList()) {
             repoName.setId(q.getRepoName());
             repoName.setName(q.getRepoName());
@@ -301,12 +315,12 @@ public class QueryService {
 
         String orgName = null;
         int days = 0;
-        for (QueryParameter p:
+        for (QueryParameter p :
                 value.getQueryParameterList()) {
-            if(Objects.equals(p.getParamName(), ParameterName.ORGNAME.getParamName())){
+            if (Objects.equals(p.getParamName(), ParameterName.ORGNAME.getParamName())) {
                 orgName = p.getParamValue();
             }
-            if(Objects.equals(p.getParamName(),ParameterName.DAYS.getParamName())){
+            if (Objects.equals(p.getParamName(), ParameterName.DAYS.getParamName())) {
                 days = Integer.parseInt(p.getParamValue());
             }
         }
@@ -315,18 +329,19 @@ public class QueryService {
                 , value.getStoredQuery().getQueryKey(), orgName, days, null, repoNamesList);
 
 
-        if(Objects.equals(value.getStoredQuery().getQueryKey(), "getPriority1IssuesOpenedBeforeXDaysQuery")){
+        if (Objects.equals(value.getStoredQuery().getQueryKey(), StringConstants.GRAPHQL_PRIORITY_1_OPEN_ISSUE_QUERY_KEY)) {
             return (int) queryResult.get("issueCount");
-        }
-        else{
-            Map<String,Object> search = (Map<String, Object>) queryResult.get("search");
+        } else {
+            Map<String, Object> search = (Map<String, Object>) queryResult.get("search");
             return (int) search.get("totalPullRequest");
         }
     }
-    /**This method will call the repository to check if current user has four queries marked for pin
+
+    /**
+     * This method will call the repository to check if current user has four queries marked for pin
      * if not then it will call repository method to mark given queryId for pin
      *
-     * @param userId Current user id
+     * @param userId  Current user id
      * @param queryId id of query to be marked for pin
      * @return status of database operation
      * @throws SQLException if error occurs in database operation
@@ -346,10 +361,11 @@ public class QueryService {
         }
     }
 
-    /**This method will call the repository method for un-marking the query from pin
+    /**
+     * This method will call the repository method for un-marking the query from pin
      *
      * @param queryId id of query to be unmarked from pin
-     * @return  status of database operation
+     * @return status of database operation
      * @throws SQLException if error occurs in database operation
      */
     public Map<String, Object> unsetPinned(int queryId) throws SQLException {
@@ -361,12 +377,13 @@ public class QueryService {
         }
     }
 
-    /** This method will call repository to get list of queries which are marked for pin
+    /**
+     * This method will call repository to get list of queries which are marked for pin
      * with the details of queries this method will call feign client to get the data of pin
      *
      * @param userId Current user id
      * @return list of pin query result with query details
-     * @throws SQLException if error occurs in database operation
+     * @throws SQLException   if error occurs in database operation
      * @throws FeignException FeignException.Unauthorized if token is invalid, FeignException.BadRequest if FeignClient returns 400 Bad Request
      */
     public Map<String, Object> getPinnedResults(int userId) throws SQLException, FeignException {
@@ -383,7 +400,7 @@ public class QueryService {
 
                 switch (((StoredQueryList) entry.getValue()).getStoredQuery().getQueryKey()) {
                     case "getPullRequestNotUpdatedByDaysQuery":
-                        StringBuilder queryNoUpdate = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getNoActivityPinQuery, orgName,days);
+                        StringBuilder queryNoUpdate = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getNoActivityPinQuery, orgName, days);
                         String graphqlQueryNoUpdate = String.format(getPinnedQuery, queryNoUpdate);
                         ResponseEntity<String> responseNoUpdate;
                         responseNoUpdate = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryNoUpdate);
@@ -391,7 +408,7 @@ public class QueryService {
                         pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), resultNoUpdate.toMap());
                         break;
                     case "getUnMergedPullRequestByDayQuery":
-                        StringBuilder queryUnMerged = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getUnmergedPinQuery, orgName,days);
+                        StringBuilder queryUnMerged = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getUnmergedPinQuery, orgName, days);
                         String graphqlQueryUnMerged = String.format(getPinnedQuery, queryUnMerged);
                         ResponseEntity<String> responseUnMerged;
                         responseUnMerged = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryUnMerged);
@@ -399,7 +416,7 @@ public class QueryService {
                         pinnedData.put(String.valueOf(((StoredQueryList) entry.getValue()).getStoredQuery().getQueryId()), resultUnMerged.toMap());
                         break;
                     case "getPriority1IssuesOpenedBeforeXDaysQuery":
-                        StringBuilder queryPriority1Issues = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getPriority1IssuesOpenedPinQuery, orgName,days);
+                        StringBuilder queryPriority1Issues = QueryUtil.getPinnedQuery(((StoredQueryList) entry.getValue()).getQueryRepoList(), getPriority1IssuesOpenedPinQuery, orgName, days);
                         String graphqlQueryPriority1Issues = String.format(getPinnedQuery, queryPriority1Issues);
                         ResponseEntity<String> responsePriority1Issues;
                         responsePriority1Issues = client.getQuery(StringConstants.AUTH_HEADER_PREFIX + ((StoredQueryList) entry.getValue()).getBearerToken(), graphqlQueryPriority1Issues);
@@ -413,7 +430,7 @@ public class QueryService {
             }
             listOfAllPinnedQueries.put("pin", pinnedData);
         } else {
-            listOfAllPinnedQueries.put(StringConstants.JSON_MESSAGE_KEY_STRING,"No Pinned Analysis");
+            listOfAllPinnedQueries.put(StringConstants.JSON_MESSAGE_KEY_STRING, "No Pinned Analysis");
         }
         return listOfAllPinnedQueries;
     }
