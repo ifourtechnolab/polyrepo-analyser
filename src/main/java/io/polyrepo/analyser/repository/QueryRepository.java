@@ -46,4 +46,5 @@ public interface QueryRepository {
 
     void deleteTrendByTrendId(Integer trendId) throws SQLException;
 
+    int updateStoredQueryLabel(int queryId, String title) throws SQLException;
 }
