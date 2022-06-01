@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -28,13 +30,13 @@ public class QueryService {
     private GraphQLClient client;
 
     @Autowired
-    QueryRepository queryRepository;
+    private QueryRepository queryRepository;
 
     @Autowired
-    ParameterRepository parameterRepository;
+    private ParameterRepository parameterRepository;
 
     @Autowired
-    StoredRepoRepository storedRepoRepository;
+    private StoredRepoRepository storedRepoRepository;
 
     @Autowired
     private IssueService issueService;
@@ -251,6 +253,76 @@ public class QueryService {
         return queryRepository.getTrendResults(userId);
     }
 
+   /**
+     * This method will get list of all queries marked for trend capture, call getResultForTrend method,
+     * check if there are 10 entries saved in database (if yes, delete the oldest entry) and save result in database
+     */
+    public void scheduledTrendCapture(){
+        try {
+            logger.debug("Getting List of All Queries Marked for Trend Capture");
+            Map<String, Object> listOfAllTrendCapturedQueries = queryRepository.getListOfAllTrendCapturedQueries();
+            for (Map.Entry<String, Object> entry :
+                    listOfAllTrendCapturedQueries.entrySet()) {
+                int result = getResultForTrend((StoredQueryList) entry.getValue());
+                TrendCapture trendCapture = new TrendCapture();
+                trendCapture.setDateOfResult(Date.valueOf(LocalDate.now()));
+                trendCapture.setQueryId(Integer.parseInt(entry.getKey()));
+                trendCapture.setResult(result);
+                List<Integer> listOfTrendCapturedByQueryId = queryRepository.getListOfTrendCapturedByQueryId(Integer.parseInt(entry.getKey()));
+                if(listOfTrendCapturedByQueryId.size() == 10) {
+                    queryRepository.deleteTrendByTrendId(listOfTrendCapturedByQueryId.get(0));
+
+                }
+                queryRepository.saveTrendResult(trendCapture);
+
+            }
+        }
+        catch (SQLException e){
+            logger.info(e.getMessage());
+        }
+    }
+
+    /**
+     * This method will get the result of query and return it to scheduledTrendCapture method
+     * @param value StoredQueryList object containing queryKey, param list, repoName list
+     * @return totalCount (issues or pull requests)
+     */
+    private int getResultForTrend(StoredQueryList value) {
+        List<RepoName> repoNames= new ArrayList<>();
+        RepoName repoName = new RepoName();
+        for (QueryRepo q:
+                value.getQueryRepoList()) {
+            repoName.setId(q.getRepoName());
+            repoName.setName(q.getRepoName());
+            repoNames.add(repoName);
+        }
+        RepoNamesList repoNamesList = new RepoNamesList();
+        repoNamesList.setRepoNames(repoNames);
+
+        String orgName = null;
+        int days = 0;
+        for (QueryParameter p:
+                value.getQueryParameterList()) {
+            if(Objects.equals(p.getParamName(), ParameterName.ORGNAME.getParamName())){
+                orgName = p.getParamValue();
+            }
+            if(Objects.equals(p.getParamName(),ParameterName.DAYS.getParamName())){
+                days = Integer.parseInt(p.getParamValue());
+            }
+        }
+
+        Map<String, Object> queryResult = getQueryResult(value.getBearerToken(), value.getStoredQuery().getQueryId()
+                , value.getStoredQuery().getQueryKey(), orgName, days, null, repoNamesList);
+
+
+        if(Objects.equals(value.getStoredQuery().getQueryKey(), "getPriority1IssuesOpenedBeforeXDaysQuery")){
+            return (int) queryResult.get("issueCount");
+        }
+        else{
+            Map<String,Object> search = (Map<String, Object>) queryResult.get("search");
+            return (int) search.get("totalPullRequest");
+        }
+    }
     /**This method will call the repository to check if current user has four queries marked for pin
      * if not then it will call repository method to mark given queryId for pin
      *
