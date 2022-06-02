@@ -195,7 +195,7 @@ public class QueryController {
     @GetMapping("{userId}/setPinned/{queryId}")
     public ResponseEntity<Map<String,Object>> setPinned(@PathVariable int userId, @PathVariable int queryId){
         try {
-            logger.debug("Set Query For Trend Capture");
+            logger.debug("Set Query For Pin");
             return new ResponseEntity<>(queryService.setPinned(userId,queryId), HttpStatus.OK);
         } catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
@@ -210,7 +210,7 @@ public class QueryController {
     @GetMapping("/unsetPinned/{queryId}")
     public ResponseEntity<Map<String,Object>> unsetPinned(@PathVariable int queryId){
         try {
-            logger.debug("Removing Query from Trend Capture");
+            logger.debug("Removing Query from Pin");
             return new ResponseEntity<>(queryService.unsetPinned(queryId),HttpStatus.OK);
         } catch (SQLException e){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
