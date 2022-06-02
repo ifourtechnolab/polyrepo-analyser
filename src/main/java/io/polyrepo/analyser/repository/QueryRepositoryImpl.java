@@ -21,8 +21,11 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${fetchStoredQueryJoinQuery}")
     private String fetchStoredQueryJoinQuery;
 
-    @Value("${deletePramRepoQuery}")
-    private String deletePramRepoQuery;
+    @Value("${deleteRepoQuery}")
+    private String deleteRepoQuery;
+
+    @Value("${deletePramQuery}")
+    private String deletePramQuery;
 
     @Value("${deleteStoredQuery}")
     private String deleteStoredQuery;
@@ -147,10 +150,14 @@ public class QueryRepositoryImpl implements QueryRepository {
     public int deleteStoredQuery(int queryId) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
             connection.setAutoCommit(false);
-            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramRepoQuery)){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramQuery)){
                 preparedStatement.setInt(1,queryId);
                 int paramRepoVal = preparedStatement.executeUpdate();
                 if( paramRepoVal>0){
+                    try(PreparedStatement preparedStat = connection.prepareStatement(deleteRepoQuery)){
+                        preparedStat.setInt(1,queryId);
+                        preparedStat.executeUpdate();
+                    }
                     try(PreparedStatement prepared = connection.prepareStatement(deleteStoredQuery)){
                         prepared.setInt(1,queryId);
                         int queryVal = prepared.executeUpdate();
