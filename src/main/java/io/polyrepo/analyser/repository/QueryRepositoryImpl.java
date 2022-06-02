@@ -27,6 +27,9 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${deletePramQuery}")
     private String deletePramQuery;
 
+    @Value("${deleteTrendCaptureDataQuery}")
+    private String deleteTrendCaptureDataQuery;
+
     @Value("${deleteStoredQuery}")
     private String deleteStoredQuery;
 
@@ -157,6 +160,10 @@ public class QueryRepositoryImpl implements QueryRepository {
                     try(PreparedStatement preparedStat = connection.prepareStatement(deleteRepoQuery)){
                         preparedStat.setInt(1,queryId);
                         preparedStat.executeUpdate();
+                    }
+                    try(PreparedStatement trendPrepared = connection.prepareStatement(deleteTrendCaptureDataQuery)){
+                        trendPrepared.setInt(1,queryId);
+                        trendPrepared.executeUpdate();
                     }
                     try(PreparedStatement prepared = connection.prepareStatement(deleteStoredQuery)){
                         prepared.setInt(1,queryId);
