@@ -264,7 +264,13 @@ public class QueryService {
      * @throws SQLException if error occurs in database operation
      */
     public Map<String, Object> getTrendResults(int userId) throws SQLException {
-        return queryRepository.getTrendResults(userId);
+        Map<String, Object> trendResults = queryRepository.getTrendResults(userId);
+        if(trendResults.size()>0){
+            return trendResults;
+        }
+        else {
+            return Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Trend Result Found");
+        }
     }
 
     /**
