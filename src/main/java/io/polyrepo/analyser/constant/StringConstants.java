@@ -18,7 +18,6 @@ public class StringConstants {
     public static final String COLUMN_PARAM_NAME_LABEL="param_name";
     public static final String COLUMN_PARAM_VALUE_LABEL="param_value";
     public static final String COLUMN_TITLE_LABEL="title";
-    public static final String COLUMN_BEARER_TOKEN_LABEL="bearer_token";
     public static final String COLUMN_NAME_LABEL="name";
     public static final String COLUMN_QUERY_LABEL="query";
     public static final String COLUMN_IS_TREND_CAPTURED_LABEL="is_trend_captured";
@@ -26,5 +25,15 @@ public class StringConstants {
     public static final String COLUMN_DATE_LABEL="date";
     public static final String COLUMN_RESULT_LABEL="result";
     public static final String COLUMN_TREND_ID_LABEL="t_id";
+    public static final String COLUMN_BEARER_TOKEN_LABEL="bearer_token";
+    public static final String COLUMN_USER_ID_LABEL="user_id";
+    public static final String COLUMN_USER_NAME_LABEL="user_name";
+
+    public static final String GRAPHQL_IDLE_PR_QUERY_KEY="getPullRequestNotUpdatedByDaysQuery";
+    public static final String GRAPHQL_UNMERGED_PR_QUERY_KEY="getUnMergedPullRequestByDayQuery";
+    public static final String GRAPHQL_PRIORITY_1_OPEN_ISSUE_QUERY_KEY="getPriority1IssuesOpenedBeforeXDaysQuery";
+    public static final String GRAPHQL_OPEN_ISSUES_BY_LABEL_QUERY_KEY="getOpenIssueNamesByLabel";
+    public static final String GRAPHQL_P1_ISSUE_TIME_QUERY_KEY="getClosedP1IssuesTimeQuery";
+    public static final String GRAPHQL_P2_ISSUE_TIME_QUERY_KEY="getClosedP2IssuesTimeQuery";
 
 }

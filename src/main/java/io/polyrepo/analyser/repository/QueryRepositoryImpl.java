@@ -21,8 +21,14 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${fetchStoredQueryJoinQuery}")
     private String fetchStoredQueryJoinQuery;
 
-    @Value("${deletePramRepoQuery}")
-    private String deletePramRepoQuery;
+    @Value("${deleteRepoQuery}")
+    private String deleteRepoQuery;
+
+    @Value("${deletePramQuery}")
+    private String deletePramQuery;
+
+    @Value("${deleteTrendCaptureDataQuery}")
+    private String deleteTrendCaptureDataQuery;
 
     @Value("${deleteStoredQuery}")
     private String deleteStoredQuery;
@@ -48,11 +54,29 @@ public class QueryRepositoryImpl implements QueryRepository {
     @Value("${getTrendResultsQuery}")
     private String getTrendResultsQuery;
 
+    @Value("${getNoOfPinnedQueries}")
+    private String getNoOfPinnedQueries;
+
+    @Value("${setPinnedQuery}")
+    private String setPinnedQuery;
+
+    @Value("${unsetPinnedQuery}")
+    private String unsetPinnedQuery;
+
+    @Value("${updateStoredQueryWithParameterQuery}")
+    private String updateStoredQueryWithParameterQuery;
+
+    @Value("${getListOfAllPinnedQueriesQuery}")
+    private String getListOfAllPinnedQueriesQuery;
+
     @Value("${getListOfTrendCapturedByQueryIdQuery}")
     private String getListOfTrendCapturedByQueryIdQuery;
 
     @Value("${deleteTrendByTrendIdQuery}")
     private String deleteTrendByTrendIdQuery;
+
+    @Value("${updateStoredQueryTitleQuery}")
+    private String updateStoredQueryTitleQuery;
 
 
     /**
@@ -81,6 +105,8 @@ public class QueryRepositoryImpl implements QueryRepository {
                         storedQuery.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
                         storedQuery.setTitle(resultSet.getString(StringConstants.COLUMN_TITLE_LABEL));
                         storedQuery.setQueryKey(resultSet.getString(StringConstants.COLUMN_QUERY_LABEL));
+                        storedQuery.setTrendCaptured(resultSet.getBoolean(StringConstants.COLUMN_IS_TREND_CAPTURED_LABEL));
+                        storedQuery.setPinned(resultSet.getBoolean(StringConstants.COLUMN_IS_PINNED_LABEL));
                         storedQueryList.setStoredQuery(storedQuery);
                         storedQueryList.createQueryParameterList(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),storedQuery.getQueryId()));
                         storedQueryList.createQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),storedQuery.getQueryId()));
@@ -127,10 +153,18 @@ public class QueryRepositoryImpl implements QueryRepository {
     public int deleteStoredQuery(int queryId) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
             connection.setAutoCommit(false);
-            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramRepoQuery)){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(deletePramQuery)){
                 preparedStatement.setInt(1,queryId);
                 int paramRepoVal = preparedStatement.executeUpdate();
                 if( paramRepoVal>0){
+                    try(PreparedStatement preparedStat = connection.prepareStatement(deleteRepoQuery)){
+                        preparedStat.setInt(1,queryId);
+                        preparedStat.executeUpdate();
+                    }
+                    try(PreparedStatement trendPrepared = connection.prepareStatement(deleteTrendCaptureDataQuery)){
+                        trendPrepared.setInt(1,queryId);
+                        trendPrepared.executeUpdate();
+                    }
                     try(PreparedStatement prepared = connection.prepareStatement(deleteStoredQuery)){
                         prepared.setInt(1,queryId);
                         int queryVal = prepared.executeUpdate();
@@ -324,8 +358,8 @@ public class QueryRepositoryImpl implements QueryRepository {
             }
         }
     }
-
-    @Override
+  
+     @Override
     public List<Integer> getListOfTrendCapturedByQueryId(int queryId) throws SQLException {
         try(Connection connection = ConnectionUtil.getConnection()){
             try(PreparedStatement preparedStatement = connection.prepareStatement(getListOfTrendCapturedByQueryIdQuery)) {
@@ -349,5 +383,136 @@ public class QueryRepositoryImpl implements QueryRepository {
             }
         }
     }
-}
 
+    /**
+     * This method will mark the query for pin
+     * @param queryId id of query to be marked for pin
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int setPinned(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(setPinnedQuery, Statement.RETURN_GENERATED_KEYS)){
+                preparedStatement.setInt(1,queryId);
+                return preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    /**
+     * This method will return number of queries marked for pin of current user
+     * @param userId Current user id
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int getPinnedQueryCount(int userId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(getNoOfPinnedQueries, Statement.RETURN_GENERATED_KEYS)){
+                preparedStatement.setInt(1,userId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                if(resultSet.next()){
+                    return resultSet.getInt(1);
+                }
+                else {
+                    return 0;
+                }
+            }
+        }
+    }
+
+    /**
+     * This method will un-mark the query for pin
+     * @param queryId id of query to be unmarked for pin
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int unsetPinned(int queryId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(unsetPinnedQuery)){
+                preparedStatement.setInt(1,queryId);
+                return preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    /**
+     * This method will update stored query and query parameters
+     * @param queryId id of query to be updated
+     * @param title title of query
+     * @param paramValue parameter name
+     * @param paramName parameter value
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int updateStoredQueryWithParameter(int queryId, String title, String paramValue, String paramName) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(updateStoredQueryWithParameterQuery)){
+                preparedStatement.setString(1,title);
+                preparedStatement.setString(2,paramValue);
+                preparedStatement.setInt(3,queryId);
+                preparedStatement.setString(4,paramName);
+                return preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    /** This method will update stored query title
+     *
+     * @param queryId id of the query to be updated
+     * @param title title of stored query
+     * @return status of database operation
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public int updateStoredQueryLabel(int queryId, String title) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(updateStoredQueryTitleQuery)){
+                preparedStatement.setString(1,title);
+                preparedStatement.setInt(2,queryId);
+                return preparedStatement.executeUpdate();
+            }
+        }
+    }
+
+    /**
+     * This method will return the list of all the pinned queries
+     * @param userId Current user id
+     * @return list of pinned queries
+     * @throws SQLException if error occurs in database operation
+     */
+    @Override
+    public Map<String, Object> getListOfAllPinnedQueries(int userId) throws SQLException {
+        try(Connection connection = ConnectionUtil.getConnection()){
+            try(PreparedStatement preparedStatement = connection.prepareStatement(getListOfAllPinnedQueriesQuery)){
+                preparedStatement.setInt(1,userId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                Map<String,Object> resultMap = new HashMap<>();
+                while (resultSet.next()){
+                    if(resultMap.containsKey(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)))){
+                        StoredQueryList pinnedStoredQueryList = (StoredQueryList) resultMap.get(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        pinnedStoredQueryList.addToQueryParameter(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        pinnedStoredQueryList.addToQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)));
+                        resultMap.replace(String.valueOf(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL)),pinnedStoredQueryList);
+                    }
+                    else {
+                        StoredQueryList pinnedStoredQueryList = new StoredQueryList();
+                        StoredQuery storedQuery = new StoredQuery();
+                        storedQuery.setQueryId(resultSet.getInt(StringConstants.TABLE_QUERYID_LABEL));
+                        storedQuery.setTitle(resultSet.getString(StringConstants.COLUMN_TITLE_LABEL));
+                        storedQuery.setQueryKey(resultSet.getString(StringConstants.COLUMN_QUERY_LABEL));
+                        pinnedStoredQueryList.setStoredQuery(storedQuery);
+                        pinnedStoredQueryList.setBearerToken(resultSet.getString(StringConstants.COLUMN_BEARER_TOKEN_LABEL));
+                        pinnedStoredQueryList.createQueryParameterList(new QueryParameter(resultSet.getString(StringConstants.COLUMN_PARAM_NAME_LABEL),resultSet.getString(StringConstants.COLUMN_PARAM_VALUE_LABEL),storedQuery.getQueryId()));
+                        pinnedStoredQueryList.createQueryRepoList(new QueryRepo(resultSet.getString(StringConstants.COLUMN_NAME_LABEL),storedQuery.getQueryId()));
+                        resultMap.put(String.valueOf(storedQuery.getQueryId()), pinnedStoredQueryList);
+                    }
+                }
+                return resultMap;
+            }
+        }
+    }
+}

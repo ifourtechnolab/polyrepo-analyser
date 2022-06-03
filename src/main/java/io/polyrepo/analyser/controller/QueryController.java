@@ -61,6 +61,27 @@ public class QueryController {
         }catch (SQLIntegrityConstraintViolationException e ){
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"Query already exists"),HttpStatus.OK);
         } catch (SQLException e) {
+            logger.debug(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
+        }
+    }
+
+    /** Endpoint to store the update query in database
+     *
+     * @param queryId id of query to be updated
+     * @param title Stored query title
+     * @param repoNamesList List of Repositories selected by user
+     * @param days Number of days for filter
+     * @param label Label for filter
+     * @return ResponseEntity with database operation status
+     */
+    @PostMapping("/updateQuery/{queryId}")
+    public ResponseEntity<Map<String, Object>> updateQuery(@PathVariable int queryId,@RequestParam String title, @RequestBody(required = false) RepoNamesList repoNamesList, @RequestParam(required = false) Integer days, @RequestParam(required = false) String label){
+        try {
+            logger.debug("Update query of user");
+            return new ResponseEntity<>(queryService.updateQueries(queryId, title, days, label, repoNamesList), HttpStatus.OK);
+        } catch (SQLException e) {
+            logger.debug(e.getMessage());
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
         }
     }
@@ -110,7 +131,7 @@ public class QueryController {
      * @param queryId id of query to be marked for trend capture
      * @return Response entity with the database operation status
      */
-    @PostMapping("{userId}/setTrendCapture/{queryId}")
+    @GetMapping("{userId}/setTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> setTrendCapture(@PathVariable int userId, @PathVariable int queryId){
         try {
             logger.debug("Set Query For Trend Capture");
@@ -125,7 +146,7 @@ public class QueryController {
      * @param queryId id of query to be unmarked from trend capture
      * @return Response entity with the database operation status
      */
-    @PostMapping("/unsetTrendCapture/{queryId}")
+    @GetMapping("/unsetTrendCapture/{queryId}")
     public ResponseEntity<Map<String,Object>> unsetTrendCapture(@PathVariable int queryId){
         try {
             logger.debug("Removing Query from Trend Capture");
@@ -162,6 +183,59 @@ public class QueryController {
             return new ResponseEntity<>(queryService.getTrendResults(userId),HttpStatus.OK);
         } catch ( SQLException e) {
             return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Trend Result Found"),HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Endpoint to mark query for pin if user has not marked three queries already
+     * @param userId Current user id
+     * @param queryId id of query to be marked for pin
+     * @return Response entity with the database operation status
+     */
+    @GetMapping("{userId}/setPinned/{queryId}")
+    public ResponseEntity<Map<String,Object>> setPinned(@PathVariable int userId, @PathVariable int queryId){
+        try {
+            logger.debug("Set Query For Pin");
+            return new ResponseEntity<>(queryService.setPinned(userId,queryId), HttpStatus.OK);
+        } catch (SQLException e){
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Endpoint to un-mark query from pin
+     * @param queryId id of query to be unmarked from pin
+     * @return Response entity with the database operation status
+     */
+    @GetMapping("/unsetPinned/{queryId}")
+    public ResponseEntity<Map<String,Object>> unsetPinned(@PathVariable int queryId){
+        try {
+            logger.debug("Removing Query from Pin");
+            return new ResponseEntity<>(queryService.unsetPinned(queryId),HttpStatus.OK);
+        } catch (SQLException e){
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_PROCESS_FAILED_VALUE),HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Endpoint to get the list of results of pin with query details from gitHub and database
+     * @param userId Current user id
+     * @return ResponseEntity with the list of pin result and query details
+     */
+    @GetMapping("{userId}/getPinnedResults")
+    public ResponseEntity<Map<String,Object>> getPinnedResults(@PathVariable int userId) {
+        try{
+            logger.debug("Getting Pinned Results");
+            return new ResponseEntity<>(queryService.getPinnedResults(userId),HttpStatus.OK);
+        } catch ( SQLException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING,"No Pinned Result Found"),HttpStatus.OK);
+        } catch (FeignException.Unauthorized e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_UNAUTHORIZED_VALUE), HttpStatus.UNAUTHORIZED);
+        } catch (FeignException.BadRequest | JSONException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(Collections.singletonMap(StringConstants.JSON_MESSAGE_KEY_STRING, StringConstants.JSON_BAD_REQUEST_VALUE), HttpStatus.BAD_REQUEST);
         }
     }
 }

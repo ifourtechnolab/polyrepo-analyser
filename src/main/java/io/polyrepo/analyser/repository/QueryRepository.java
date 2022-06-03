@@ -32,7 +32,19 @@ public interface QueryRepository {
 
     void saveTrendResult(TrendCapture trendCapture) throws SQLException;
 
+    int setPinned(int queryId) throws SQLException;
+
+    int getPinnedQueryCount(int userId) throws SQLException;
+
+    int unsetPinned(int queryId) throws SQLException;
+
+    int updateStoredQueryWithParameter(int queryId, String title, String paramValue, String paramName) throws SQLException;
+
+    Map<String, Object> getListOfAllPinnedQueries(int userId) throws SQLException;
+
     List<Integer> getListOfTrendCapturedByQueryId(int queryId) throws SQLException;
 
     void deleteTrendByTrendId(Integer trendId) throws SQLException;
+
+    int updateStoredQueryLabel(int queryId, String title) throws SQLException;
 }

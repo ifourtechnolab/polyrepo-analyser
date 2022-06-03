@@ -1,5 +1,6 @@
 package io.polyrepo.analyser.repository;
 
+import io.polyrepo.analyser.constant.StringConstants;
 import io.polyrepo.analyser.model.User;
 import io.polyrepo.analyser.util.ConnectionUtil;
 import org.slf4j.Logger;
@@ -57,9 +58,9 @@ public class UserRepositoryImpl implements UserRepository {
                 preparedStatement.setString(2,password);
                 ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
-                    user.setUserId(resultSet.getInt("id"));
-                    user.setBearerToken(resultSet.getString("bearer_token"));
-                    user.setUserName(resultSet.getString("user_name"));
+                    user.setUserId(resultSet.getInt(StringConstants.COLUMN_USER_ID_LABEL));
+                    user.setBearerToken(resultSet.getString(StringConstants.COLUMN_BEARER_TOKEN_LABEL));
+                    user.setUserName(resultSet.getString(StringConstants.COLUMN_USER_NAME_LABEL));
                 }
             }
         }catch (SQLException e){
